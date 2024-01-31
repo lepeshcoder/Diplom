@@ -1,0 +1,47 @@
+﻿using YAVCS.Services.Contracts;
+
+namespace YAVCS.Services;
+
+/*!
+  \file   NavigatorService.cs
+  \brief  Description in INavigatorService.cs
+
+  \author lepesh
+  \date   01.02.2024
+*/
+
+public class NavigatorService : INavigatorService
+{
+    // optimization(caching) field 
+    private VcsRootDirectoryNavigator? _vcsRootDirectoryNavigator;
+    
+    // description in interface
+    public VcsRootDirectoryNavigator? TryGetRepositoryRootDirectory(string workingDirectoryAbsolutePath)
+    {
+        // return cache if it is not null
+        if (_vcsRootDirectoryNavigator != null)
+        {
+            return _vcsRootDirectoryNavigator;
+        }
+        // else is it repository root directory then cache and return it otherwise go to it's parent
+        var currentDirectory = new DirectoryInfo(workingDirectoryAbsolutePath);
+        while (currentDirectory != null)
+        {
+            if (IsRepositoryRootDirectory(currentDirectory.FullName))
+            {
+                _vcsRootDirectoryNavigator = new VcsRootDirectoryNavigator(currentDirectory.FullName);
+                return _vcsRootDirectoryNavigator;
+            }
+            currentDirectory = Directory.GetParent(currentDirectory.FullName);
+        }
+        // if no directory before the root of the file system is a repository return null 
+        return null;
+    }
+
+    // checks whether the directory is repository root directory
+    private bool IsRepositoryRootDirectory(string currentDirectoryFullName)
+    {
+        //TODO: implement check for repoRootDirectory (probably check for .yavcs/ and check server sideKey in config file)
+        throw new NotImplementedException();
+    }
+}

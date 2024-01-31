@@ -1,6 +1,6 @@
 ﻿using YAVCS.Constants;
 
-namespace YAVCS.VcsRootDirectoryNavigator;
+namespace YAVCS;
 
 /*!
   \file   VcsRootDirectoryNavigator.cs
@@ -17,14 +17,9 @@ public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
 {
     public string VcsRootDirectory => absoluteRepositoryPath + '/' + FileSystemConstants.VcsRootDirectory;
     public string RefsDirectory => VcsRootDirectory + '/' + FileSystemConstants.RefsDirectory;
-
     public string HeadsDirectory => RefsDirectory + '/' + FileSystemConstants.HeadsDirectory;
-
     public string ObjectsDirectory => VcsRootDirectory + '/' + FileSystemConstants.ObjectsDirectory;
-
     public string IndexFile => VcsRootDirectory + '/' + FileSystemConstants.IndexFile;
-
     public string HeadFile => VcsRootDirectory + '/' + FileSystemConstants.HeadFile;
-
     public string ConfigFile => VcsRootDirectory + '/' + FileSystemConstants.ConfigFile;
 }
