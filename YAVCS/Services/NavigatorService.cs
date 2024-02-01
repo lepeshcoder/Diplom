@@ -1,4 +1,5 @@
-﻿using YAVCS.Services.Contracts;
+﻿using YAVCS.Constants;
+using YAVCS.Services.Contracts;
 
 namespace YAVCS.Services;
 
@@ -41,7 +42,12 @@ public class NavigatorService : INavigatorService
     // checks whether the directory is repository root directory
     private bool IsRepositoryRootDirectory(string currentDirectoryFullName)
     {
+        // check that .yavcs folder exists in directory
+        if (!Directory.Exists(currentDirectoryFullName + '/' + FileSystemConstants.VcsRootDirectory))
+            return false;
+        // check that the APP create it using config public data as public Key and App-Side Key as secret
+        
         //TODO: implement check for repoRootDirectory (probably check for .yavcs/ and check server sideKey in config file)
-        throw new NotImplementedException();
+        throw new  NotImplementedException();
     }
 }
