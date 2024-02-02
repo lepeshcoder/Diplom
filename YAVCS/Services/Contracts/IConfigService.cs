@@ -20,4 +20,5 @@ public interface IConfigService
 
     // Write new config data to config file
     void ReWriteConfig(string configFileAbsolutePath, ConfigFileModel newConfigData);
+    
 }

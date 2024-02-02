@@ -10,6 +10,8 @@
 
 public interface ICommand
 {
+    // Short Description of a command
     string Description { get; }  
+    // Method that perform all command logic
     void Execute(string[] args);
 }
