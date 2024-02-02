@@ -1,3 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using YAVCS;
 
-Console.WriteLine("Hello, World!");
+App.Configure();
+App.Run(args);
