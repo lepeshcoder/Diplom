@@ -32,9 +32,6 @@ public class ConfigService : IConfigService
 
     public void ReWriteConfig(string configFileAbsolutePath, ConfigFileModel newConfigData)
     {
-        // check if file exists
-        if (!File.Exists(configFileAbsolutePath)) throw new Exception("Config File doesn't exist");
-        // rewriting info
         File.WriteAllText(configFileAbsolutePath,newConfigData.ToString());
     }
 }

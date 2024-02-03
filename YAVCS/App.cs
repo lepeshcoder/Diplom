@@ -30,6 +30,8 @@ public static class App
 
     public static void Run(string[] args)
     {
-        _commands[args[0]].Execute(args.Skip(1).ToArray());
+        var command = args[0];
+        if(!_commands.ContainsKey(command)) Console.WriteLine("No such command");
+        else _commands[args[0]].Execute(args.Skip(1).ToArray());
     }
 }

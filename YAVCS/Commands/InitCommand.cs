@@ -1,5 +1,4 @@
-﻿using System.Net;
-using YAVCS.Commands.Contracts;
+﻿using YAVCS.Commands.Contracts;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -35,7 +34,7 @@ public class InitCommand : ICommand
     public void Execute(string[] args)
     {
         // give command format 
-        if (args[0] == "--help")
+        if (args.Length > 0 && args[0] == "--help")
         {
             Console.WriteLine(Description);
             return;
@@ -45,7 +44,7 @@ public class InitCommand : ICommand
         // if directory is a part of repository 
         if (vcsRootDirectoryNavigator != null)
         {
-            Console.WriteLine("Repository already exists");
+            Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.VcsRootDirectory);
             return;
         }
         // otherwise create .yavcs directory
@@ -63,9 +62,18 @@ public class InitCommand : ICommand
         Directory.CreateDirectory(vcsRootDirectoryNavigator.RefsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.ObjectsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.HeadsDirectory);
-        File.Create(vcsRootDirectoryNavigator.HeadFile);
-        File.Create(vcsRootDirectoryNavigator.IndexFile);
-        File.Create(vcsRootDirectoryNavigator.ConfigFile);
+        using (var fs = File.Create(vcsRootDirectoryNavigator.HeadFile))
+        {
+            
+        };
+        using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile))
+        {
+            
+        };
+        using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile))
+        {
+            
+        };
         // Write default data to config file
         _configService.ReWriteConfig(vcsRootDirectoryNavigator.ConfigFile,
             new ConfigFileModel("user","email",DateTime.Now));
