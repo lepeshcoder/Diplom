@@ -43,11 +43,6 @@ public class NavigatorService : INavigatorService
     private bool IsRepositoryRootDirectory(string currentDirectoryFullName)
     {
         // check that .yavcs folder exists in directory
-        if (!Directory.Exists(currentDirectoryFullName + '/' + FileSystemConstants.VcsRootDirectory))
-            return false;
-        // check that the APP create it using config public data as public Key and App-Side Key as secret
-        
-        //TODO: implement check for repoRootDirectory (probably check for .yavcs/ and check server sideKey in config file)
-        throw new  NotImplementedException();
+        return Directory.Exists(currentDirectoryFullName + '/' + FileSystemConstants.VcsRootDirectory);
     }
 }
