@@ -22,4 +22,5 @@ public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
     public string IndexFile => VcsRootDirectory + '/' + FileSystemConstants.IndexFile;
     public string HeadFile => VcsRootDirectory + '/' + FileSystemConstants.HeadFile;
     public string ConfigFile => VcsRootDirectory + '/' + FileSystemConstants.ConfigFile;
+    public string IgnoreFile => VcsRootDirectory + '/' + FileSystemConstants.IgnoreFile;
 }

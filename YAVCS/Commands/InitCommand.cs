@@ -16,8 +16,15 @@ namespace YAVCS.Commands;
 */
 
 
-public class InitCommand : ICommand
+public class InitCommand : Command,ICommand
 {
+
+    private enum CommandCases : int
+    {
+        SyntaxError = 0,
+        HelpCase = 1,
+        DefaultCase = 2
+    }
     
     public string Description => "Init - Create a repository if it doesn't exist, otherwise return exception \"Repository already exists\"";
 
@@ -33,22 +40,36 @@ public class InitCommand : ICommand
 
     public void Execute(string[] args)
     {
-        // give command format 
-        if (args.Length > 0 && args[0] == "--help")
+        // Get command case by args
+        var commandCase = GetCommandCase(args);
+        // Perform command by case
+        switch (commandCase)
         {
-            Console.WriteLine(Description);
-            return;
+            case CommandCases.SyntaxError:
+            {
+                Console.WriteLine("invalid args");
+                break;
+            }
+            case CommandCases.HelpCase:
+            {
+                Console.WriteLine(Description);
+                break;
+            }
+            case CommandCases.DefaultCase:
+            {
+                var workingDirectory = Environment.CurrentDirectory;
+                var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory(workingDirectory);
+                // if directory is a part of repository 
+                if (vcsRootDirectoryNavigator != null)
+                {
+                    Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.VcsRootDirectory);
+                    return;
+                }
+                // otherwise create .yavcs directory
+                CreateVcsRootDirectory(workingDirectory);
+                break;
+            }
         }
-        var workingDirectory = Environment.CurrentDirectory;
-        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory(workingDirectory);
-        // if directory is a part of repository 
-        if (vcsRootDirectoryNavigator != null)
-        {
-            Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.VcsRootDirectory);
-            return;
-        }
-        // otherwise create .yavcs directory
-        CreateVcsRootDirectory(workingDirectory);
     }
 
     // create .yavcs directory and all inner directories/files
@@ -62,20 +83,22 @@ public class InitCommand : ICommand
         Directory.CreateDirectory(vcsRootDirectoryNavigator.RefsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.ObjectsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.HeadsDirectory);
-        using (var fs = File.Create(vcsRootDirectoryNavigator.HeadFile))
-        {
-            
-        };
-        using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile))
-        {
-            
-        };
-        using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile))
-        {
-            
-        };
+        using (var fs = File.Create(vcsRootDirectoryNavigator.HeadFile)) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
         // Write default data to config file
         _configService.ReWriteConfig(vcsRootDirectoryNavigator.ConfigFile,
             new ConfigFileModel("user","email",DateTime.Now));
+    }
+
+    protected override Enum GetCommandCase(string[] args)
+    {
+        return args switch
+        {
+            ["--help"] => CommandCases.HelpCase,
+            [] => CommandCases.DefaultCase,
+            _ => CommandCases.SyntaxError
+        };
     }
 }

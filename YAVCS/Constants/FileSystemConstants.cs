@@ -13,6 +13,7 @@
     index 
     head
     config
+    ignore
       
   \author lepesh
   \date   31.01.2024
@@ -34,4 +35,6 @@ public static class FileSystemConstants
     public const string HeadFile = "head";
     // config File name
     public const string ConfigFile = "config";
+    // ignore File name
+    public const string IgnoreFile = "ignore";
 }
