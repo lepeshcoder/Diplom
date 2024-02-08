@@ -11,6 +11,10 @@ public static class DependencyInjectionConfig
         return new ServiceCollection()
             .AddSingleton<INavigatorService,NavigatorService>()
             .AddSingleton<IConfigService,ConfigService>()
+            .AddSingleton<IIgnoreService,IgnoreService>()
+            .AddSingleton<IHashService,HashService>()
+            .AddSingleton<IBlobService,BlobService>()
+            .AddSingleton<IIndexService,IndexService>()
             .BuildServiceProvider();
     }
 }

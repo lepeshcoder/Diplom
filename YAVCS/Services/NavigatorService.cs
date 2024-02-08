@@ -17,7 +17,7 @@ public class NavigatorService : INavigatorService
     private VcsRootDirectoryNavigator? _vcsRootDirectoryNavigator;
     
     // description in interface
-    public VcsRootDirectoryNavigator? TryGetRepositoryRootDirectory(string workingDirectoryAbsolutePath)
+    public VcsRootDirectoryNavigator? TryGetRepositoryRootDirectory()
     {
         // return cache if it is not null
         if (_vcsRootDirectoryNavigator != null)
@@ -25,7 +25,7 @@ public class NavigatorService : INavigatorService
             return _vcsRootDirectoryNavigator;
         }
         // else is it repository root directory then cache and return it otherwise go to it's parent
-        var currentDirectory = new DirectoryInfo(workingDirectoryAbsolutePath);
+        var currentDirectory = new DirectoryInfo(Environment.CurrentDirectory);
         while (currentDirectory != null)
         {
             if (IsRepositoryRootDirectory(currentDirectory.FullName))

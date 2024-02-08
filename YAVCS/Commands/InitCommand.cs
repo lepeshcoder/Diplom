@@ -19,7 +19,7 @@ namespace YAVCS.Commands;
 public class InitCommand : Command,ICommand
 {
 
-    private enum CommandCases : int
+    private enum CommandCases
     {
         SyntaxError = 0,
         HelpCase = 1,
@@ -58,7 +58,7 @@ public class InitCommand : Command,ICommand
             case CommandCases.DefaultCase:
             {
                 var workingDirectory = Environment.CurrentDirectory;
-                var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory(workingDirectory);
+                var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 // if directory is a part of repository 
                 if (vcsRootDirectoryNavigator != null)
                 {
@@ -88,8 +88,7 @@ public class InitCommand : Command,ICommand
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
         // Write default data to config file
-        _configService.ReWriteConfig(vcsRootDirectoryNavigator.ConfigFile,
-            new ConfigFileModel("user","email",DateTime.Now));
+        _configService.ReWriteConfig(new ConfigFileModel("user","email",DateTime.Now));
     }
 
     protected override Enum GetCommandCase(string[] args)

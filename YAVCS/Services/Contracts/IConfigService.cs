@@ -16,9 +16,8 @@ namespace YAVCS.Services.Contracts;
 public interface IConfigService
 {
     // Try get data from config file, if the format is invalid return null 
-    ConfigFileModel? TryGetConfigData(string configFileAbsolutePath);
+    ConfigFileModel? TryGetConfigData();
 
     // Write new config data to config file
-    void ReWriteConfig(string configFileAbsolutePath, ConfigFileModel newConfigData);
-    
+    void ReWriteConfig(ConfigFileModel newConfigData);
 }

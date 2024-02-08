@@ -1,0 +1,61 @@
+﻿using YAVCS.Models;
+using YAVCS.Services.Contracts;
+
+namespace YAVCS.Services;
+
+public class IndexService : IIndexService
+{
+    
+    //services
+    private readonly INavigatorService _navigatorService;
+
+    // Dictionary of index rcords by path
+    private Dictionary<string, IndexRecord> _recordsByPath = new();
+    
+    public IndexService(INavigatorService navigatorService)
+    {
+        // fill dictionary with data in index file
+        _navigatorService = navigatorService;
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        if (vcsRootDirectoryNavigator == null) return;
+        var records = File.ReadAllLines(vcsRootDirectoryNavigator.IndexFile);
+        foreach (var record in records)
+        {
+            var parts = record.Split(' ');
+            var path = parts[0];
+            var hash = parts[1];
+            _recordsByPath.Add(path, new IndexRecord(path,hash));
+        }
+    }
+
+    public void AddRecord(IndexRecord record)
+    {
+        // update dictionary
+        _recordsByPath.Add(record.RelativePath,record);
+        // update index file
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        if (vcsRootDirectoryNavigator == null) return;
+        File.AppendAllText(vcsRootDirectoryNavigator.IndexFile,record.ToString());
+    }
+
+    public void DeleteRecord(string path)
+    {
+        // update dictionary
+        _recordsByPath.Remove(path);
+        // update file
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        if (vcsRootDirectoryNavigator == null) return;
+        var records = _recordsByPath.Values.Select(x => x.ToString()).ToArray();
+        File.WriteAllLines(vcsRootDirectoryNavigator.IndexFile,records);
+    }
+
+    public bool IsRecordExist(string path)
+    {
+        return _recordsByPath.ContainsKey(path);
+    }
+
+    public IndexRecord? TryGetRecordByPath(string relativePath)
+    {
+        return _recordsByPath.GetValueOrDefault(relativePath);
+    }
+}

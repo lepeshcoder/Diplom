@@ -14,8 +14,22 @@ namespace YAVCS.Services;
 
 public class ConfigService : IConfigService
 {
-    public ConfigFileModel? TryGetConfigData(string configFileAbsolutePath)
+    
+    // Services 
+    private readonly INavigatorService _navigatorService;
+
+    public ConfigService(INavigatorService navigatorService)
     {
+        _navigatorService = navigatorService;
+    }
+
+
+    public ConfigFileModel? TryGetConfigData()
+    {
+        // Get navigator
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        if (vcsRootDirectoryNavigator == null) return null;
+        var configFileAbsolutePath = vcsRootDirectoryNavigator.ConfigFile;
         // check if file exists
         if (!File.Exists(configFileAbsolutePath)) return null;
         // read data from file
@@ -29,8 +43,11 @@ public class ConfigService : IConfigService
         return new ConfigFileModel(userName, userEmail, createdAt);
     }
 
-    public void ReWriteConfig(string configFileAbsolutePath, ConfigFileModel newConfigData)
+    public void ReWriteConfig(ConfigFileModel newConfigData)
     {
-        File.WriteAllText(configFileAbsolutePath,newConfigData.ToString());
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var configFileAbsolutePath = vcsRootDirectoryNavigator?.ConfigFile;
+        if (configFileAbsolutePath != null) 
+            File.WriteAllText(configFileAbsolutePath, newConfigData.ToString());
     }
 }
