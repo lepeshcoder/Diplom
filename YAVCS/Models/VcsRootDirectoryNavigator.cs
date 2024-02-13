@@ -15,6 +15,7 @@ namespace YAVCS;
 
 public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
 {
+    public string RepositoryRootDirectory => absoluteRepositoryPath;
     public string VcsRootDirectory => absoluteRepositoryPath + '/' + FileSystemConstants.VcsRootDirectory;
     public string RefsDirectory => VcsRootDirectory + '/' + FileSystemConstants.RefsDirectory;
     public string HeadsDirectory => RefsDirectory + '/' + FileSystemConstants.HeadsDirectory;

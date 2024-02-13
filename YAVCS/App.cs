@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Threading.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using YAVCS.Commands;
 using YAVCS.Commands.Contracts;
 using YAVCS.Services.Contracts;
@@ -24,6 +25,13 @@ public static class App
                 "init", 
                 new InitCommand(Services.GetRequiredService<INavigatorService>(),
                                   Services.GetRequiredService<IConfigService>())
+            },
+            {
+                "add",
+                new AddCommand(Services.GetRequiredService<INavigatorService>(),
+                                  Services.GetRequiredService<IHashService>(),
+                                  Services.GetRequiredService<IBlobService>(),
+                                 Services.GetRequiredService<IIndexService>())
             }
         };
     }
@@ -32,6 +40,16 @@ public static class App
     {
         var command = args[0];
         if(!_commands.ContainsKey(command)) Console.WriteLine("No such command");
-        else _commands[args[0]].Execute(args.Skip(1).ToArray());
+        else
+        {
+            try
+            {
+                _commands[args[0]].Execute(args.Skip(1).ToArray());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
     }
 }

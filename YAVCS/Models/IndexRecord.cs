@@ -16,6 +16,6 @@ public class IndexRecord
     
     public override string ToString()
     {
-        return RelativePath + ' ' + BlobHash + '\n';
+        return RelativePath + ' ' + BlobHash;
     }
 }

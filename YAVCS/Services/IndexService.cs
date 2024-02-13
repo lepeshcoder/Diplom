@@ -1,4 +1,5 @@
-﻿using YAVCS.Models;
+﻿using System.Collections.Concurrent;
+using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Services;
@@ -9,7 +10,7 @@ public class IndexService : IIndexService
     //services
     private readonly INavigatorService _navigatorService;
 
-    // Dictionary of index rcords by path
+    // Dictionary of index records by path
     private Dictionary<string, IndexRecord> _recordsByPath = new();
     
     public IndexService(INavigatorService navigatorService)
@@ -32,21 +33,12 @@ public class IndexService : IIndexService
     {
         // update dictionary
         _recordsByPath.Add(record.RelativePath,record);
-        // update index file
-        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        if (vcsRootDirectoryNavigator == null) return;
-        File.AppendAllText(vcsRootDirectoryNavigator.IndexFile,record.ToString());
     }
 
     public void DeleteRecord(string path)
     {
         // update dictionary
         _recordsByPath.Remove(path);
-        // update file
-        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        if (vcsRootDirectoryNavigator == null) return;
-        var records = _recordsByPath.Values.Select(x => x.ToString()).ToArray();
-        File.WriteAllLines(vcsRootDirectoryNavigator.IndexFile,records);
     }
 
     public bool IsRecordExist(string path)
@@ -57,5 +49,13 @@ public class IndexService : IIndexService
     public IndexRecord? TryGetRecordByPath(string relativePath)
     {
         return _recordsByPath.GetValueOrDefault(relativePath);
+    }
+
+    public void SaveChanges()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        if (vcsRootDirectoryNavigator == null) return;
+        var records = _recordsByPath.Values.Select(x => x.ToString()).ToArray();
+        File.WriteAllLines(vcsRootDirectoryNavigator.IndexFile,records);
     }
 }

@@ -21,7 +21,7 @@ public class AddCommand : Command,ICommand
     private readonly IHashService _hashService;
     private readonly IBlobService _blobService;
     private readonly IIndexService _indexService;
-
+    
     public AddCommand(INavigatorService navigatorService, IHashService hashService, IBlobService blobService, IIndexService indexService)
     {
         _navigatorService = navigatorService;
@@ -59,24 +59,44 @@ public class AddCommand : Command,ICommand
             {
                 // check for repository exists
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-                if(vcsRootDirectoryNavigator == null) Console.WriteLine("Repository doesn't exist");
+                if (vcsRootDirectoryNavigator == null)
+                {
+                    Console.WriteLine("Repository doesn't exist");
+                    return;
+                }
                 // check for item exists
                 var itemRelativePath = args[0];
                 var itemAbsolutePath = Environment.CurrentDirectory + '/' + itemRelativePath;
                 if (File.Exists(itemAbsolutePath))
                 {
-                    StageFile(itemRelativePath);
+                    try
+                    {
+                        StageFile(itemRelativePath);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
                 }
                 else if (Directory.Exists(itemAbsolutePath))
                 {
-                    StageDirectory(itemRelativePath);
+                    StageDirectory(itemAbsolutePath);
                 }
                 else Console.WriteLine($"{itemAbsolutePath} doesn't exist");
                 break;
             }
             case CommandCases.AddAll:
             {
-                //TODO:
+                var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+                if (vcsRootDirectoryNavigator == null)
+                {
+                    Console.WriteLine("Repository doesn't exist");
+                    return;
+                }
+                
+                StageDirectory(vcsRootDirectoryNavigator.RepositoryRootDirectory);
+                
+
                 break;
             }
         }
@@ -93,13 +113,13 @@ public class AddCommand : Command,ICommand
         };
     }
 
-    private void StageFile(string relativePath)
+    private void StageFile(string absolutePath)
     {
         // read bytes and get new hash
-        var currentDirectory = Environment.CurrentDirectory;
-        var absolutePath = currentDirectory + '/' + relativePath;
         var byteData = File.ReadAllBytes(absolutePath);
         var newHash = _hashService.GetHash(byteData);
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var relativePath = Path.GetRelativePath(vcsRootDirectoryNavigator!.RepositoryRootDirectory, absolutePath);
         var oldRecord = _indexService.TryGetRecordByPath(relativePath);
         // if record with the same path already exist
         if (oldRecord != null)
@@ -109,6 +129,7 @@ public class AddCommand : Command,ICommand
             {
                 throw new Exception("File is already staged and not modified");
             }
+            // if file modified
             else
             {
                 // create new blob if it doesn't exist
@@ -132,11 +153,23 @@ public class AddCommand : Command,ICommand
             // add record to index
             _indexService.AddRecord(new IndexRecord(relativePath,newHash));
         }
+        _indexService.SaveChanges();
     }
 
-    private void StageDirectory(string relativePath)
+    private void StageDirectory(string absolutePath)
     {
-        throw new NotImplementedException();
+        foreach (var entry in Directory.GetFileSystemEntries(absolutePath))
+        {
+            if (File.Exists(entry))
+            {
+                StageFile(entry);
+            }
+            else if (Directory.Exists(entry))
+            {
+                StageDirectory(entry);
+            }
+            else throw new Exception($"{entry} isn't file or directory");
+        }
     }
 
 }
