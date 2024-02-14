@@ -87,6 +87,7 @@ public class InitCommand : Command,ICommand
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
+
         // Write default data to config file
         _configService.ReWriteConfig(new ConfigFileModel("user","email",DateTime.Now));
     }
