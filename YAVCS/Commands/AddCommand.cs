@@ -1,4 +1,5 @@
 ﻿using YAVCS.Commands.Contracts;
+using YAVCS.Exceptions;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -21,13 +22,16 @@ public class AddCommand : Command,ICommand
     private readonly IHashService _hashService;
     private readonly IBlobService _blobService;
     private readonly IIndexService _indexService;
+    private readonly IIgnoreService _ignoreService;
     
-    public AddCommand(INavigatorService navigatorService, IHashService hashService, IBlobService blobService, IIndexService indexService)
+    public AddCommand(INavigatorService navigatorService, IHashService hashService, IBlobService blobService, 
+        IIndexService indexService, IIgnoreService ignoreService)
     {
         _navigatorService = navigatorService;
         _hashService = hashService;
         _blobService = blobService;
         _indexService = indexService;
+        _ignoreService = ignoreService;
     }
 
     private enum CommandCases
@@ -61,8 +65,7 @@ public class AddCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    Console.WriteLine("Repository doesn't exist");
-                    return;
+                    throw new RepositoryNotFoundException("not a part of repository");
                 }
                 // check for item exists
                 var itemRelativePath = args[0];
@@ -93,10 +96,7 @@ public class AddCommand : Command,ICommand
                     Console.WriteLine("Repository doesn't exist");
                     return;
                 }
-                
                 StageDirectory(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-                
-
                 break;
             }
         }
@@ -120,6 +120,7 @@ public class AddCommand : Command,ICommand
         var newHash = _hashService.GetHash(byteData);
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var relativePath = Path.GetRelativePath(vcsRootDirectoryNavigator!.RepositoryRootDirectory, absolutePath);
+        if (_ignoreService.IsItemIgnored(relativePath)) return;
         var oldRecord = _indexService.TryGetRecordByPath(relativePath);
         // if record with the same path already exist
         if (oldRecord != null)
@@ -127,7 +128,7 @@ public class AddCommand : Command,ICommand
             // if file isn't modify
             if (oldRecord.BlobHash == newHash)
             {
-                throw new Exception("File is already staged and not modified");
+                throw new ItemAlreadyStagedException("File is already staged and not modified");
             }
             // if file modified
             else
@@ -140,6 +141,7 @@ public class AddCommand : Command,ICommand
                 // change blobHash in old record
                 _indexService.DeleteRecord(oldRecord.RelativePath);
                 _indexService.AddRecord(new IndexRecord(oldRecord.RelativePath,newHash));
+                _indexService.SaveChanges();
             }
         }
         // if no record with the same path
@@ -152,17 +154,28 @@ public class AddCommand : Command,ICommand
             }
             // add record to index
             _indexService.AddRecord(new IndexRecord(relativePath,newHash));
+            _indexService.SaveChanges();
         }
-        _indexService.SaveChanges();
     }
 
     private void StageDirectory(string absolutePath)
     {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var relativePath = Path.GetRelativePath(vcsRootDirectoryNavigator!.RepositoryRootDirectory, absolutePath);
+        if (_ignoreService.IsItemIgnored(relativePath)) return;
+        
         foreach (var entry in Directory.GetFileSystemEntries(absolutePath))
         {
             if (File.Exists(entry))
             {
-                StageFile(entry);
+                try
+                {
+                    StageFile(entry);
+                }
+                catch (ItemAlreadyStagedException e)
+                {
+                   // ignore item is already staged exception  
+                }   
             }
             else if (Directory.Exists(entry))
             {

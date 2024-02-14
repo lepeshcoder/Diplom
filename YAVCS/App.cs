@@ -31,7 +31,8 @@ public static class App
                 new AddCommand(Services.GetRequiredService<INavigatorService>(),
                                   Services.GetRequiredService<IHashService>(),
                                   Services.GetRequiredService<IBlobService>(),
-                                 Services.GetRequiredService<IIndexService>())
+                                 Services.GetRequiredService<IIndexService>(),
+                                  Services.GetRequiredService<IIgnoreService>())
             }
         };
     }

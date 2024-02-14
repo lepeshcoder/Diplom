@@ -13,6 +13,6 @@
 public interface IIgnoreService
 {
     // checks whether the file should be included in the index based on the ignore rules in ignore file
-    bool CheckIgnoreRules(string itemAbsolutePath);
+    bool IsItemIgnored(string itemRelativePath);
     
 }
