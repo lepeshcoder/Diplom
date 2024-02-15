@@ -9,4 +9,5 @@ public interface IIndexService
     bool IsRecordExist(string relativePath);
     IndexRecord? TryGetRecordByPath(string relativePath);
     void SaveChanges();
+    Dictionary<string,IndexRecord> GetRecords();
 }

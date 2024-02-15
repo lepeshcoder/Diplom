@@ -1,8 +1,8 @@
 ﻿using YAVCS;
-using YAVCS.Services;
 
+
+//TODO: Add attributes of newfile/modified in indexRecord
 //TODO: Comments
-//TODO: IgnoreService and add to add command
 //TODO: StatusCommand
 //TODO: UnStage Command 
 //TODO: Exceptions or error codes?
