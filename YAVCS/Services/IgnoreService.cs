@@ -58,9 +58,7 @@ public class IgnoreService : IIgnoreService
         
         if (Directory.Exists(itemAbsolutePath))
         {
-            var directoryName = Path.GetFileName(itemRelativePath);
-            //check directory name rules
-            if (_ignoreDirectoryRules.Any(rule => rule.Equals(directoryName)))
+            if (_ignoreDirectoryRules.Any(rule => rule.Equals(itemRelativePath)))
             {
                 return true;
             }
@@ -69,9 +67,8 @@ public class IgnoreService : IIgnoreService
         else if(File.Exists(itemAbsolutePath))
         {
             var itemExtension = Path.GetExtension(itemRelativePath);
-            var fileName = Path.GetFileName(itemRelativePath);
             //check file name rules
-            if (_ignoreFileRules.Any(rule => rule.Equals(fileName)))
+            if (_ignoreFileRules.Any(rule => rule.Equals(itemRelativePath )))
             {
                 return true;
             }

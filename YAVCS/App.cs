@@ -33,6 +33,17 @@ public static class App
                                   Services.GetRequiredService<IBlobService>(),
                                  Services.GetRequiredService<IIndexService>(),
                                   Services.GetRequiredService<IIgnoreService>())
+            },
+            {
+                "status",
+                 new StatusCommand(Services.GetRequiredService<INavigatorService>(),
+                     Services.GetRequiredService<IIndexService>(),
+                     Services.GetRequiredService<IHashService>())
+            },
+            {
+                "unstage",
+                new UnStageCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IIndexService>())
             }
         };
     }

@@ -25,7 +25,9 @@ public class IndexService : IIndexService
             var parts = record.Split(' ');
             var path = parts[0];
             var hash = parts[1];
-            _recordsByPath.Add(path, new IndexRecord(path,hash));
+            var success = bool.TryParse(parts[2],out var isNew);
+            if (!success) throw new Exception("Invalid indexRecord format");
+            _recordsByPath.Add(path, new IndexRecord(path,hash,isNew));
         }
     }
 
@@ -57,5 +59,10 @@ public class IndexService : IIndexService
         if (vcsRootDirectoryNavigator == null) return;
         var records = _recordsByPath.Values.Select(x => x.ToString()).ToArray();
         File.WriteAllLines(vcsRootDirectoryNavigator.IndexFile,records);
+    }
+
+    public Dictionary<string, IndexRecord> GetRecords()
+    {
+        return _recordsByPath;
     }
 }
