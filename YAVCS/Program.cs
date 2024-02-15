@@ -1,11 +1,13 @@
 ﻿using YAVCS;
 
-
-//TODO: Add attributes of newfile/modified in indexRecord
+//TODO: Fix Ignore Service
+//TODO: GarbageCollection
+//TODO: PackFiles
+//TODO: Refactor Code on exceptions and remove useless code
 //TODO: Comments
-//TODO: StatusCommand
 //TODO: UnStage Command 
 //TODO: Exceptions or error codes?
+//TODO: Parallel executing and smart work with index without rewriting file every time
 
 
 App.Configure();

@@ -63,10 +63,10 @@ public class StatusCommand : Command,ICommand
                 Console.WriteLine("Staged Items:");
                 foreach (var item in _stagedItems) Console.WriteLine(item);
                 
-                Console.WriteLine("UnStaged Items:");
+                Console.WriteLine("\nUnStaged Items:");
                 foreach (var item in _unStagedItems) Console.WriteLine(item);
 
-                Console.WriteLine("UnTracked Items:");
+                Console.WriteLine("\nUnTracked Items:");
                 foreach (var item in _unTrackedItems) Console.WriteLine(item);
                 
                 break;

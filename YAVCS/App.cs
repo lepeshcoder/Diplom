@@ -39,6 +39,11 @@ public static class App
                  new StatusCommand(Services.GetRequiredService<INavigatorService>(),
                      Services.GetRequiredService<IIndexService>(),
                      Services.GetRequiredService<IHashService>())
+            },
+            {
+                "unstage",
+                new UnStageCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IIndexService>())
             }
         };
     }
