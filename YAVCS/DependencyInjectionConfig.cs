@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using YAVCS.Models;
 using YAVCS.Services;
 using YAVCS.Services.Contracts;
 
@@ -15,6 +16,8 @@ public static class DependencyInjectionConfig
             .AddSingleton<IHashService,HashService>()
             .AddSingleton<IBlobService,BlobService>()
             .AddSingleton<IIndexService,IndexService>()
+            .AddSingleton<ITreeService,TreeService>()
+            .AddSingleton<ICommitService,CommitService>()
             .BuildServiceProvider();
     }
 }

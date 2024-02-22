@@ -82,6 +82,9 @@ public class InitCommand : Command,ICommand
         // create inner directories and files
         Directory.CreateDirectory(vcsRootDirectoryNavigator.RefsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.ObjectsDirectory);
+        Directory.CreateDirectory(vcsRootDirectoryNavigator.BlobsDirectory);
+        Directory.CreateDirectory(vcsRootDirectoryNavigator.TreesDirectory);
+        Directory.CreateDirectory(vcsRootDirectoryNavigator.CommitsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.HeadsDirectory);
         using (var fs = File.Create(vcsRootDirectoryNavigator.HeadFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};

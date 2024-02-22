@@ -15,7 +15,7 @@ public class ConfigFileModel
 {
     // user nick
     private string _userName;
-
+   
     // user email
     private string _userEmail;
 

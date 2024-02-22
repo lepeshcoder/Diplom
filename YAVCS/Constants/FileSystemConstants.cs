@@ -37,4 +37,10 @@ public static class FileSystemConstants
     public const string ConfigFile = "config";
     // ignore File name
     public const string IgnoreFile = "ignore";
+    // blobs Directory
+    public const string BlobsDirectory = "blobs";
+    // trees Directory
+    public const string TreesDirectory = "trees";
+    // commits Directory 
+    public const string CommitsDirectory = "commits";
 }

@@ -44,6 +44,12 @@ public static class App
                 "unstage",
                 new UnStageCommand(Services.GetRequiredService<INavigatorService>(),
                     Services.GetRequiredService<IIndexService>())
+            },
+            {
+                "commit",
+                new CommitCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<ITreeService>())
             }
         };
     }

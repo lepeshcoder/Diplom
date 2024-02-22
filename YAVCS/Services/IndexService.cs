@@ -65,4 +65,9 @@ public class IndexService : IIndexService
     {
         return _recordsByPath;
     }
+
+    public bool IsIndexEmpty()
+    {
+        return _recordsByPath.Count == 0;
+    }
 }

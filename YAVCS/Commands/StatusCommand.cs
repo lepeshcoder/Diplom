@@ -14,9 +14,9 @@ public class StatusCommand : Command,ICommand
     private readonly IIndexService _indexService;
     private readonly IHashService _hashService;
 
-    private List<string> _stagedItems = [];
-    private List<string> _unStagedItems = [];
-    private List<string> _unTrackedItems = [];
+    private readonly List<string> _stagedItems = [];
+    private readonly List<string> _unStagedItems = [];
+    private readonly List<string> _unTrackedItems = [];
     private Dictionary<string, IndexRecord> _recordsByPath = new();
     
     private enum CommandCases
@@ -86,8 +86,6 @@ public class StatusCommand : Command,ICommand
 
     private void GetStatusInfo()
     {
-        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        var repositoryRootDirectory = vcsRootDirectoryNavigator!.RepositoryRootDirectory;
         _recordsByPath = _indexService.GetRecords();
         
         FillTrackedItems(_recordsByPath);
