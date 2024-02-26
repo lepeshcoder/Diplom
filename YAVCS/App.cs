@@ -24,15 +24,15 @@ public static class App
             { 
                 "init", 
                 new InitCommand(Services.GetRequiredService<INavigatorService>(),
-                                  Services.GetRequiredService<IConfigService>())
+                    Services.GetRequiredService<IConfigService>())
             },
             {
                 "add",
                 new AddCommand(Services.GetRequiredService<INavigatorService>(),
-                                  Services.GetRequiredService<IHashService>(),
-                                  Services.GetRequiredService<IBlobService>(),
-                                 Services.GetRequiredService<IIndexService>(),
-                                  Services.GetRequiredService<IIgnoreService>())
+                    Services.GetRequiredService<IHashService>(),
+                    Services.GetRequiredService<IBlobService>(),
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<IIgnoreService>())
             },
             {
                 "status",
@@ -49,7 +49,9 @@ public static class App
                 "commit",
                 new CommitCommand(Services.GetRequiredService<INavigatorService>(),
                     Services.GetRequiredService<IIndexService>(),
-                    Services.GetRequiredService<ITreeService>())
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<IGarbageCollectorService>())
             }
         };
     }

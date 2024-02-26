@@ -16,16 +16,17 @@ namespace YAVCS;
 public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
 {
     public string RepositoryRootDirectory => absoluteRepositoryPath;
-    public string VcsRootDirectory => absoluteRepositoryPath + '/' + FileSystemConstants.VcsRootDirectory;
-    public string RefsDirectory => VcsRootDirectory + '/' + FileSystemConstants.RefsDirectory;
-    public string HeadsDirectory => RefsDirectory + '/' + FileSystemConstants.HeadsDirectory;
-    public string ObjectsDirectory => VcsRootDirectory + '/' + FileSystemConstants.ObjectsDirectory;
-    public string IndexFile => VcsRootDirectory + '/' + FileSystemConstants.IndexFile;
-    public string HeadFile => VcsRootDirectory + '/' + FileSystemConstants.HeadFile;
-    public string ConfigFile => VcsRootDirectory + '/' + FileSystemConstants.ConfigFile;
-    public string IgnoreFile => VcsRootDirectory + '/' + FileSystemConstants.IgnoreFile;
-    public string BlobsDirectory => ObjectsDirectory + '/' + FileSystemConstants.BlobsDirectory;
-    public string TreesDirectory => ObjectsDirectory + '/' + FileSystemConstants.TreesDirectory;
-    public string CommitsDirectory => ObjectsDirectory + '/' + FileSystemConstants.CommitsDirectory;
+    public string VcsRootDirectory => absoluteRepositoryPath + Path.DirectorySeparatorChar + FileSystemConstants.VcsRootDirectory;
+    public string RefsDirectory => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.RefsDirectory;
+    public string HeadsDirectory => RefsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.HeadsDirectory;
+    public string ObjectsDirectory => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.ObjectsDirectory;
+    public string IndexFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.IndexFile;
+    public string HeadFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.HeadFile;
+    public string ConfigFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.ConfigFile;
+    public string IgnoreFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.IgnoreFile;
+    public string BlobsDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.BlobsDirectory;
+    public string TreesDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.TreesDirectory;
+    public string CommitsDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.CommitsDirectory;
+    public string LogFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.LogFile;
 
 }

@@ -16,6 +16,8 @@ public class TreeFileModel
         Hash = hash;
     }
 
+    
+    
     public void TryAddChild(ChildItemModel childItem)
     {
         Childs.TryAdd(childItem.Name, childItem);

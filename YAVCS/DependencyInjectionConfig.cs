@@ -18,6 +18,7 @@ public static class DependencyInjectionConfig
             .AddSingleton<IIndexService,IndexService>()
             .AddSingleton<ITreeService,TreeService>()
             .AddSingleton<ICommitService,CommitService>()
+            .AddSingleton<IGarbageCollectorService,GarbageCollectorService>()
             .BuildServiceProvider();
     }
 }

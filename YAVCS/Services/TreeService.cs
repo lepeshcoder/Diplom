@@ -34,25 +34,44 @@ public class TreeService : ITreeService
         return rootTreeHash;
     }
 
+    public TreeFileModel GetTreeByHash(string treeHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var treeFile = vcsRootDirectoryNavigator!.TreesDirectory + Path.DirectorySeparatorChar + treeHash;
+        var lines = File.ReadAllLines(treeFile);
+        var treeName = lines[0];
+        var childs = new Dictionary<string, ChildItemModel>();
+        for (var i = 1; i < lines.Length; i++)
+        {
+            var parts = lines[i].Split(' ');
+            var childName = parts[0];
+            var childHash = parts[1];
+            var childType = int.Parse(parts[2]);
+            childs.Add(childName,new ChildItemModel(childName,childType,childHash));
+        }
+        return new TreeFileModel(treeName, childs, treeHash);
+    }
+
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")
     {
         var temp = "";
         var childItems = tree.Childs.Values.ToList();
         foreach (var childItem in childItems)
         {
-            if (childItem.Type == ChildItemModel.Types.Blob)
+            if (childItem.Type == (int)ChildItemModel.Types.Blob)
             {
                 temp += childItem.Hash;
             }
             else
             {
-                var childTreeRelativePath = temp + childItem.Name + Path.DirectorySeparatorChar;
+                var childTreeRelativePath = path + childItem.Name + Path.DirectorySeparatorChar;
                 var childTree = treesByRelativePath[childTreeRelativePath];
-                childTree.Hash = GetTreeHash(childTree,treesByRelativePath,childTreeRelativePath);
-                temp += childTree.Hash;
+                childItem.Hash = GetTreeHash(childTree,treesByRelativePath,childTreeRelativePath);
+                temp += childItem.Hash;
             }
         }
-        return _hashService.GetHash(temp);
+        tree.Hash = _hashService.GetHash(temp);
+        return tree.Hash;
     }
 
     private Dictionary<string, TreeFileModel> FillTreesDictionary(List<IndexRecord> records)
@@ -67,20 +86,20 @@ public class TreeService : ITreeService
             var fileName = Path.GetFileName(record.RelativePath);
             var directoryName = Path.GetDirectoryName(record.RelativePath);
             // case when file is in repository root directory
-            if (directoryName == null)
+            if (directoryName == "")
             {
                 // add child file item to root tree
-                var childFileItem = new ChildItemModel(fileName, ChildItemModel.Types.Blob, record.BlobHash);
+                var childFileItem = new ChildItemModel(fileName, (int)ChildItemModel.Types.Blob, record.BlobHash);
                 treesByRelativePath[""].TryAddChild(childFileItem);
             }
             else
             {
                 var tempPath = "";
-                var pathParts = directoryName.Split(Path.DirectorySeparatorChar);
+                var pathParts = directoryName!.Split(Path.DirectorySeparatorChar);
                 foreach (var pathPart in pathParts)
                 {
                     var treeRelativePath = tempPath + pathPart + Path.DirectorySeparatorChar;
-                    var childTreeItem = new ChildItemModel(pathPart, ChildItemModel.Types.Tree);
+                    var childTreeItem = new ChildItemModel(pathPart, (int)ChildItemModel.Types.Tree);
                     treesByRelativePath[tempPath].TryAddChild(childTreeItem);
                     if (!treesByRelativePath.ContainsKey(treeRelativePath))
                     {
@@ -89,7 +108,7 @@ public class TreeService : ITreeService
                     }
                     tempPath = treeRelativePath;
                 }
-                var childFileItem = new ChildItemModel(fileName, ChildItemModel.Types.Blob, record.BlobHash);
+                var childFileItem = new ChildItemModel(fileName, (int)ChildItemModel.Types.Blob, record.BlobHash);
                 treesByRelativePath[tempPath].TryAddChild(childFileItem);
             }
         }

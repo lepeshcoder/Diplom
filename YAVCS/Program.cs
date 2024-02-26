@@ -1,7 +1,6 @@
 ﻿using YAVCS;
-using YAVCS.Services;
 
-
+//TODO: Add logging
 //TODO: Add PreviousCommit to CommitModel or think about commit graph
 //TODO: GarbageCollection
 //TODO: PackFiles
@@ -12,3 +11,4 @@ using YAVCS.Services;
 
 App.Configure();
 App.Run(args);
+

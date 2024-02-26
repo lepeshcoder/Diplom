@@ -11,13 +11,16 @@ public class CommitCommand : Command, ICommand
     private readonly IIndexService _indexService;
     private readonly ITreeService _treeService;
     private readonly ICommitService _commitService;
+    private readonly IGarbageCollectorService _garbageCollectorService;
 
-    public CommitCommand(INavigatorService navigatorService, IIndexService indexService, ITreeService treeService, ICommitService commitService)
+    public CommitCommand(INavigatorService navigatorService, IIndexService indexService,
+        ITreeService treeService, ICommitService commitService, IGarbageCollectorService garbageCollectorService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
         _treeService = treeService;
         _commitService = commitService;
+        _garbageCollectorService = garbageCollectorService;
     }
 
     private enum CommandCases
@@ -32,7 +35,7 @@ public class CommitCommand : Command, ICommand
         return args switch
         {
             ["--help"] => CommandCases.HelpCase,
-            ["--m"] => CommandCases.DefaultCase,
+            _ when args.Length != 0 => CommandCases.DefaultCase,
             _ => CommandCases.SyntaxError
         };
     }
@@ -66,8 +69,10 @@ public class CommitCommand : Command, ICommand
                     throw new EmptyIndexException("Commit.Execute");
                 }
                 var rootTreeHash = _treeService.CreateTreeByIndex();
-                var commitMessage = args[1];
+                var commitMessage = args.Aggregate("", (current, arg) => current + arg + " ");
                 _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage);
+                _garbageCollectorService.CollectGarbage();
+                //TODO: MOVE HEAD POINTER, UPDATE ACTIVE BRANCH HEAD, CLEAR INDEX?
                 break;
             }
         }

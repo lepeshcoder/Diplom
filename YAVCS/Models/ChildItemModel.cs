@@ -12,9 +12,9 @@ public  class ChildItemModel
     
     public string Hash { get; set; }
 
-    public Types Type { get; }
+    public int Type { get; }
 
-    public ChildItemModel(string name, Types type , string hash = "")
+    public ChildItemModel(string name, int type , string hash = "")
     {
         Name = name;
         Type = type;

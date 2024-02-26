@@ -27,4 +27,23 @@ public class BlobService : IBlobService
         if (vcsRootDirectoryNavigator == null) return false;
         return File.Exists(vcsRootDirectoryNavigator.BlobsDirectory + '/' + hash);
     }
+
+    public HashSet<string> GetAllBlobs()
+    {
+        var blobsHashes = new HashSet<string>();
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        foreach (var blobFile in Directory.GetFiles(vcsRootDirectoryNavigator!.BlobsDirectory))
+        {
+            var hash = Path.GetFileName(blobFile);
+            blobsHashes.Add(hash);
+        }
+        return blobsHashes;
+    }
+
+    public void DeleteBlob(string blobHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var blobFilePath = vcsRootDirectoryNavigator!.BlobsDirectory + Path.DirectorySeparatorChar + blobHash;
+        File.Delete(blobFilePath);
+    }
 }

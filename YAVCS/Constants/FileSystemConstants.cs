@@ -43,4 +43,6 @@ public static class FileSystemConstants
     public const string TreesDirectory = "trees";
     // commits Directory 
     public const string CommitsDirectory = "commits";
+    // log file
+    public const string LogFile = "log";
 }
