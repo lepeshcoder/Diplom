@@ -8,11 +8,14 @@ public class CommitFileModel
 
     public string Message;
 
-    public CommitFileModel(string treeHash, DateTime createdAt, string message)
+    public string Hash;
+
+    public CommitFileModel(string treeHash, DateTime createdAt, string message,string hash)
     {
         TreeHash = treeHash;
         CreatedAt = createdAt;
         Message = message;
+        Hash = hash;
     }
 
     public CommitFileModel(string commitFilePath)
@@ -27,6 +30,5 @@ public class CommitFileModel
     {
         return TreeHash + '\n' + CreatedAt + '\n' + Message;
     }
-    
     
 }

@@ -16,12 +16,13 @@ public class CommitService : ICommitService
         _hashService = hashService;
     }
 
-    public void CreateCommit(string treeHash, DateTime createdAt, string message)
+    public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message)
     {
-        var newCommit = new CommitFileModel(treeHash, createdAt, message);
         var commitHash = _hashService.GetHash(treeHash + createdAt + message);
+        var newCommit = new CommitFileModel(treeHash, createdAt, message,commitHash);
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var commitFilePath = vcsRootDirectoryNavigator!.CommitsDirectory + Path.DirectorySeparatorChar + commitHash;
         File.WriteAllText(commitFilePath,newCommit.ToString());
+        return newCommit;
     }
 }

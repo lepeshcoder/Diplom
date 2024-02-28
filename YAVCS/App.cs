@@ -24,7 +24,8 @@ public static class App
             { 
                 "init", 
                 new InitCommand(Services.GetRequiredService<INavigatorService>(),
-                    Services.GetRequiredService<IConfigService>())
+                    Services.GetRequiredService<IConfigService>(),
+                    Services.GetRequiredService<IBranchService>())
             },
             {
                 "add",
@@ -51,7 +52,8 @@ public static class App
                     Services.GetRequiredService<IIndexService>(),
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<ICommitService>(),
-                    Services.GetRequiredService<IGarbageCollectorService>())
+                    Services.GetRequiredService<IGarbageCollectorService>(),
+                    Services.GetRequiredService<IBranchService>())
             }
         };
     }

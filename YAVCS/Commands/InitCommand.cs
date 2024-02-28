@@ -31,11 +31,13 @@ public class InitCommand : Command,ICommand
     // Services for command logic
     private readonly INavigatorService _navigatorService;
     private readonly IConfigService _configService;
+    private readonly IBranchService _branchService;
 
-    public InitCommand(INavigatorService navigatorService, IConfigService configService)
+    public InitCommand(INavigatorService navigatorService, IConfigService configService, IBranchService branchService)
     {
         _navigatorService = navigatorService;
         _configService = configService;
+        _branchService = branchService;
     }
 
     public void Execute(string[] args)
@@ -90,9 +92,13 @@ public class InitCommand : Command,ICommand
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
-
+        
         // Write default data to config file
         _configService.ReWriteConfig(new ConfigFileModel("user","email",DateTime.Now));
+
+        var masterBranch = new BranchFileModel("Master", "ZeroCommit");
+        _branchService.CreateBranch(masterBranch);
+        _branchService.SetActiveBranch(masterBranch);
     }
 
     protected override Enum GetCommandCase(string[] args)

@@ -17,7 +17,7 @@ public class BlobService : IBlobService
     public void CreateBlob(byte[] data)
     {
         var blobHash = _hashService.GetHash(data);
-        var blobPath = _navigatorService.TryGetRepositoryRootDirectory()!.BlobsDirectory + '/' + blobHash;
+        var blobPath = _navigatorService.TryGetRepositoryRootDirectory()!.BlobsDirectory + Path.DirectorySeparatorChar + blobHash;
         File.WriteAllBytes(blobPath,data);
     }
 
@@ -25,7 +25,7 @@ public class BlobService : IBlobService
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         if (vcsRootDirectoryNavigator == null) return false;
-        return File.Exists(vcsRootDirectoryNavigator.BlobsDirectory + '/' + hash);
+        return File.Exists(vcsRootDirectoryNavigator.BlobsDirectory + Path.DirectorySeparatorChar + hash);
     }
 
     public HashSet<string> GetAllBlobs()

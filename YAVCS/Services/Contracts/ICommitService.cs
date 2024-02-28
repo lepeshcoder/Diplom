@@ -1,6 +1,8 @@
-﻿namespace YAVCS.Services.Contracts;
+﻿using YAVCS.Models;
+
+namespace YAVCS.Services.Contracts;
 
 public interface ICommitService
 {
-    void CreateCommit(string treeHash,DateTime createdAt, string message);
+    CommitFileModel CreateCommit(string treeHash,DateTime createdAt, string message);
 }

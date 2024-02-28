@@ -31,11 +31,11 @@ public class GarbageCollectorService : IGarbageCollectorService
             CollectTreeGarbage(rootTree,blobsHashes);
         }
         // after deleting only blobs with no references remained
-        // deleting them
         foreach (var blobHash in blobsHashes)
         {
             _blobService.DeleteBlob(blobHash);
         }
+        
     }
 
     private void CollectTreeGarbage(TreeFileModel tree,HashSet<string> blobsHashes)

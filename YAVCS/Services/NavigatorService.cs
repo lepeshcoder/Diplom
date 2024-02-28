@@ -43,6 +43,6 @@ public class NavigatorService : INavigatorService
     private bool IsRepositoryRootDirectory(string currentDirectoryFullName)
     {
         // check that .yavcs folder exists in directory
-        return Directory.Exists(currentDirectoryFullName + '/' + FileSystemConstants.VcsRootDirectory);
+        return Directory.Exists(currentDirectoryFullName + Path.DirectorySeparatorChar + FileSystemConstants.VcsRootDirectory);
     }
 }
