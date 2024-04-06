@@ -52,6 +52,14 @@ public class TreeService : ITreeService
         return new TreeFileModel(treeName, childs, treeHash);
     }
 
+    public Dictionary<string, IndexRecord> GetTreeRecordsByPath(string treeHash)
+    {
+        var tree = GetTreeByHash(treeHash);
+        var recordsByPath = new Dictionary<string, IndexRecord>();
+        ParseTree(tree, recordsByPath);
+        return recordsByPath;
+    }
+
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")
     {
         var temp = "";
@@ -120,5 +128,23 @@ public class TreeService : ITreeService
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var treeFile = vcsRootDirectoryNavigator!.TreesDirectory + Path.DirectorySeparatorChar + tree.Hash;
         File.WriteAllText(treeFile,tree.ToString());
+    }
+
+   void ParseTree(TreeFileModel tree, Dictionary<string, IndexRecord> records, string path = "")
+    {
+        foreach (var child in tree.Childs)
+        {
+            var childType = child.Value.Type;
+            if (childType == (int)ChildItemModel.Types.Blob)
+            {
+                records.Add(path + child.Value.Name,new IndexRecord(path + child.Value.Name,child.Value.Hash));
+            }
+            else
+            {
+                var childTree = GetTreeByHash(child.Value.Hash);
+                var newPath = path + child.Value.Name + Path.DirectorySeparatorChar;
+                ParseTree(childTree, records, newPath);
+            }
+        }
     }
 }

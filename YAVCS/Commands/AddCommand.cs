@@ -140,7 +140,7 @@ public class AddCommand : Command,ICommand
                 }
                 // change blobHash in old record
                 _indexService.DeleteRecord(oldRecord.RelativePath);
-                _indexService.AddRecord(new IndexRecord(oldRecord.RelativePath,newHash,false));
+                _indexService.AddRecord(new IndexRecord(oldRecord.RelativePath,newHash));
                 _indexService.SaveChanges();
             }
         }
@@ -153,7 +153,7 @@ public class AddCommand : Command,ICommand
                 _blobService.CreateBlob(byteData);
             }
             // add record to index
-            _indexService.AddRecord(new IndexRecord(relativePath,newHash,true));
+            _indexService.AddRecord(new IndexRecord(relativePath,newHash));
             _indexService.SaveChanges();
         }
     }

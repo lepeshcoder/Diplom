@@ -70,11 +70,13 @@ public class CommitCommand : Command, ICommand
                 {
                     throw new EmptyIndexException("Commit.Execute");
                 }
+                var activeBranch = _branchService.GetActiveBranch();
                 var rootTreeHash = _treeService.CreateTreeByIndex();
                 var commitMessage = args.Aggregate("", (current, arg) => current + arg + " ");
-                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage);
-                var activeBranch = _branchService.GetActiveBranch();
-                _branchService.UpdateBranch(activeBranch.Name,newCommit);
+                var parentCommitHash = (activeBranch == null)? "ZerroCommit" : activeBranch.CommitHash;
+                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,parentCommitHash);
+                
+                _branchService.UpdateBranch((activeBranch == null)? "Master" : activeBranch.Name,newCommit);
                 _garbageCollectorService.CollectGarbage();
                 //TODO: CLEAR INDEX?
                 break; 

@@ -9,9 +9,7 @@ public  class ChildItemModel
     }
     
     public string Name { get; }
-    
     public string Hash { get; set; }
-
     public int Type { get; }
 
     public ChildItemModel(string name, int type , string hash = "")

@@ -8,4 +8,6 @@ public interface ITreeService
    string CreateTreeByIndex();
 
    TreeFileModel GetTreeByHash(string rootTreeHash);
+
+   Dictionary<string, IndexRecord> GetTreeRecordsByPath(string treeHash);
 }

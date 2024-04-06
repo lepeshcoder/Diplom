@@ -25,9 +25,7 @@ public class IndexService : IIndexService
             var parts = record.Split(' ');
             var path = parts[0];
             var hash = parts[1];
-            var success = bool.TryParse(parts[2],out var isNew);
-            if (!success) throw new Exception("Invalid indexRecord format");
-            _recordsByPath.Add(path, new IndexRecord(path,hash,isNew));
+            _recordsByPath.Add(path, new IndexRecord(path,hash));
         }
     }
 
@@ -70,4 +68,6 @@ public class IndexService : IIndexService
     {
         return _recordsByPath.Count == 0;
     }
+
+  
 }

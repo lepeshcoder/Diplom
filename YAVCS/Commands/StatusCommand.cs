@@ -8,16 +8,17 @@ namespace YAVCS.Commands;
 
 public class StatusCommand : Command,ICommand
 {
-
-
     private readonly INavigatorService _navigatorService;
     private readonly IIndexService _indexService;
     private readonly IHashService _hashService;
+    private readonly ICommitService _commitService;
 
     private readonly List<string> _stagedItems = [];
     private readonly List<string> _unStagedItems = [];
     private readonly List<string> _unTrackedItems = [];
-    private Dictionary<string, IndexRecord> _recordsByPath = new();
+    
+    private Dictionary<string, IndexRecord> _indexRecordsByPath = new();
+    private Dictionary<string, IndexRecord> _headRecordsByPath = new();
     
     private enum CommandCases
     {
@@ -26,11 +27,13 @@ public class StatusCommand : Command,ICommand
         DefaultCase = 2
     }
 
-    public StatusCommand(INavigatorService navigatorService, IIndexService indexService, IHashService hashService)
+    public StatusCommand(INavigatorService navigatorService, IIndexService indexService,
+        IHashService hashService, ICommitService commitService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
         _hashService = hashService;
+        _commitService = commitService;
     }
 
     public string Description => "Show status of working tree";
@@ -86,38 +89,51 @@ public class StatusCommand : Command,ICommand
 
     private void GetStatusInfo()
     {
-        _recordsByPath = _indexService.GetRecords();
-        
-        FillTrackedItems(_recordsByPath);
-        FillUnTrackedItems(_recordsByPath);
+        _indexRecordsByPath = _indexService.GetRecords();
+        _headRecordsByPath = _commitService.GetHeadRecordsByPath();
+        FillTrackedItems(_indexRecordsByPath,_headRecordsByPath);
+        FillUnTrackedItems(_indexRecordsByPath);
     }
 
-    private void FillTrackedItems(Dictionary<string, IndexRecord> recordsByPath)
+    private void FillTrackedItems(Dictionary<string, IndexRecord> indexRecordsByPath,Dictionary<string,IndexRecord> headRecordsByPath)
     {
         var repositoryRootDirectory = _navigatorService.TryGetRepositoryRootDirectory()!.RepositoryRootDirectory;
-        // fill staged / unStaged items
-        var records = recordsByPath.Values.ToList();
-        foreach (var record in records)
+        //fill stagedItems
+        foreach (var indexRecord in indexRecordsByPath.Values)
         {
-            var itemAbsolutePath = repositoryRootDirectory + Path.DirectorySeparatorChar + record.RelativePath;
-            if (record.IsNew) 
-                _stagedItems.Add("new file: " + record.RelativePath);
-            else 
-                _stagedItems.Add("modified: " + record.RelativePath);
-            if (File.Exists(itemAbsolutePath))
+            var recordPath = indexRecord.RelativePath;
+            if (!headRecordsByPath.ContainsKey(recordPath))
             {
-                var byteData = File.ReadAllBytes(itemAbsolutePath);
-                var newHash = _hashService.GetHash(byteData);
-                if (record.BlobHash != newHash)
-                {
-                    _unStagedItems.Add("modified: " + record.RelativePath);
-                }
+                _stagedItems.Add($"new file: {recordPath}");
             }
             else
             {
-                _unStagedItems.Add("deleted: " + record.RelativePath);
+                var headRecord = headRecordsByPath[recordPath];
+                if (indexRecord.BlobHash != headRecord.BlobHash)
+                {
+                    _stagedItems.Add($"modified: {recordPath}");
+                }
+            }
+        } 
+        //fill unstaged items
+        foreach (var indexRecord in indexRecordsByPath.Values)
+        {
+            var recordAbsolutePath = repositoryRootDirectory + Path.DirectorySeparatorChar + indexRecord.RelativePath;
+            if (!File.Exists(recordAbsolutePath))
+            {
+                _unStagedItems.Add($"deleted: {indexRecord.RelativePath}");
+            }
+            else
+            {
+                var fileData = File.ReadAllBytes(recordAbsolutePath);
+                var newHash = _hashService.GetHash(fileData);
+                if (newHash != indexRecord.BlobHash)
+                {
+                    _unStagedItems.Add($"modified: {indexRecord.RelativePath}");
+                }
             }
         }
+        
     }
     
     private void FillUnTrackedItems(Dictionary<string, IndexRecord> recordsByPath)
@@ -137,7 +153,7 @@ public class StatusCommand : Command,ICommand
             if (File.Exists(entry))
             {
                 var fileRelativePath = Path.GetRelativePath(repositoryRootDirectory, entry);
-                if (!_recordsByPath.ContainsKey(fileRelativePath))
+                if (!_indexRecordsByPath.ContainsKey(fileRelativePath))
                     items.Add(fileRelativePath);
                 else isDirHidden = false;
             }

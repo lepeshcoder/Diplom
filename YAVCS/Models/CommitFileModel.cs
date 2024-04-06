@@ -10,12 +10,15 @@ public class CommitFileModel
 
     public string Hash;
 
-    public CommitFileModel(string treeHash, DateTime createdAt, string message,string hash)
+    public string ParentCommitHash;
+
+    public CommitFileModel(string treeHash, DateTime createdAt, string message,string hash,string parentCommitHash)
     {
         TreeHash = treeHash;
         CreatedAt = createdAt;
         Message = message;
         Hash = hash;
+        ParentCommitHash = parentCommitHash;
     }
 
     public CommitFileModel(string commitFilePath)
@@ -24,11 +27,13 @@ public class CommitFileModel
         TreeHash = data[0];
         CreatedAt = DateTime.Parse(data[1]);
         Message = data[2];
+        ParentCommitHash = data[3];
+        Hash = Path.GetFileName(commitFilePath);
     }
     
     public override string ToString()
     {
-        return TreeHash + '\n' + CreatedAt + '\n' + Message;
+        return TreeHash + '\n' + CreatedAt + '\n' + Message + '\n' + ParentCommitHash;
     }
     
 }

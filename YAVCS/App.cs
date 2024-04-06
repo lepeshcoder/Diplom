@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using YAVCS.Commands;
 using YAVCS.Commands.Contracts;
+using YAVCS.Services;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS;
@@ -39,7 +40,8 @@ public static class App
                 "status",
                  new StatusCommand(Services.GetRequiredService<INavigatorService>(),
                      Services.GetRequiredService<IIndexService>(),
-                     Services.GetRequiredService<IHashService>())
+                     Services.GetRequiredService<IHashService>(),
+                     Services.GetRequiredService<ICommitService>())
             },
             {
                 "unstage",
@@ -54,6 +56,12 @@ public static class App
                     Services.GetRequiredService<ICommitService>(),
                     Services.GetRequiredService<IGarbageCollectorService>(),
                     Services.GetRequiredService<IBranchService>())
+            },
+            {
+                "log",
+                new LogCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<ICommitService>())
             }
         };
     }

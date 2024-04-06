@@ -8,17 +8,15 @@ public class IndexRecord
     // file's blob hash 
     public string BlobHash { get; }
     
-    public bool IsNew { get; } 
 
-    public IndexRecord(string relativePath, string blobHash,bool isNew)
+    public IndexRecord(string relativePath, string blobHash)
     {
         RelativePath = relativePath;
         BlobHash = blobHash;
-        IsNew = isNew;
     }
     
     public override string ToString()
     {
-        return RelativePath + ' ' + BlobHash + ' ' + IsNew;
+        return RelativePath + ' ' + BlobHash;
     }
 }

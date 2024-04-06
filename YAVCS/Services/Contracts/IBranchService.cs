@@ -4,7 +4,7 @@ namespace YAVCS.Services.Contracts;
 
 public interface IBranchService
 {
-    BranchFileModel GetActiveBranch();
+    BranchFileModel? GetActiveBranch();
 
     void SetActiveBranch(BranchFileModel branch);
     

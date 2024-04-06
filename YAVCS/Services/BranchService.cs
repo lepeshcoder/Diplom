@@ -13,14 +13,14 @@ public class BranchService : IBranchService
         _navigatorService = navigatorService;
     }
 
-    public BranchFileModel GetActiveBranch()
+    public BranchFileModel? GetActiveBranch()
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var headFilePath = vcsRootDirectoryNavigator!.HeadFile;
         var activeBranchName = File.ReadAllText(headFilePath);
         var activeBranchFilePath =  vcsRootDirectoryNavigator.HeadsDirectory + Path.DirectorySeparatorChar + activeBranchName;
         var commitHash = File.ReadAllText(activeBranchFilePath);
-        return new BranchFileModel(activeBranchName, commitHash);
+        return commitHash == "ZeroCommit" ? null : new BranchFileModel(activeBranchName, commitHash);
     }
 
     public void SetActiveBranch(BranchFileModel branch)
