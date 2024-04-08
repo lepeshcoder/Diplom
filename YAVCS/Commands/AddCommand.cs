@@ -69,7 +69,7 @@ public class AddCommand : Command,ICommand
                 }
                 // check for item exists
                 var itemRelativePath = args[0];
-                var itemAbsolutePath = Environment.CurrentDirectory + '/' + itemRelativePath;
+                var itemAbsolutePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 if (File.Exists(itemAbsolutePath))
                 {
                     try
@@ -85,7 +85,21 @@ public class AddCommand : Command,ICommand
                 {
                     StageDirectory(itemAbsolutePath);
                 }
-                else Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                else
+                {
+                    var relativePath = Path.GetRelativePath(vcsRootDirectoryNavigator.RepositoryRootDirectory,
+                        itemAbsolutePath);
+                    var oldRecord = _indexService.TryGetRecordByPath(relativePath);
+                    if (oldRecord == null)
+                    {
+                        Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                    }
+                    else
+                    {
+                        _indexService.DeleteRecord(relativePath);
+                        _indexService.SaveChanges();
+                    }
+                }
                 break;
             }
             case CommandCases.AddAll:
@@ -185,5 +199,6 @@ public class AddCommand : Command,ICommand
             else throw new Exception($"{entry} isn't file or directory");
         }
     }
+    
 
 }
