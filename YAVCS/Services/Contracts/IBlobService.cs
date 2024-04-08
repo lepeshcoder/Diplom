@@ -9,4 +9,6 @@ public interface IBlobService
     HashSet<string> GetAllBlobs();
 
     void DeleteBlob(string blobHash);
+
+    byte[] GetBlobData(string blobHash);
 }

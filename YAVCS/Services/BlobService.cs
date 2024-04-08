@@ -46,4 +46,11 @@ public class BlobService : IBlobService
         var blobFilePath = vcsRootDirectoryNavigator!.BlobsDirectory + Path.DirectorySeparatorChar + blobHash;
         File.Delete(blobFilePath);
     }
+
+    public byte[] GetBlobData(string blobHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var blobFilePath = vcsRootDirectoryNavigator!.BlobsDirectory + Path.DirectorySeparatorChar + blobHash;
+        return File.ReadAllBytes(blobFilePath);
+    }
 }

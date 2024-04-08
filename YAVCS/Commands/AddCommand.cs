@@ -146,7 +146,7 @@ public class AddCommand : Command,ICommand
         }
         // if no record with the same path
         else
-        {
+        { 
             // create blob if it doesn't exist
             if (!_blobService.IsBlobExist(newHash))
             {
@@ -160,6 +160,7 @@ public class AddCommand : Command,ICommand
 
     private void StageDirectory(string absolutePath)
     {
+        
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var relativePath = Path.GetRelativePath(vcsRootDirectoryNavigator!.RepositoryRootDirectory, absolutePath);
         if (_ignoreService.IsItemIgnored(relativePath)) return;
@@ -170,11 +171,11 @@ public class AddCommand : Command,ICommand
             {
                 try
                 {
-                    StageFile(entry);
+                    StageFile(entry);   
                 }
                 catch (ItemAlreadyStagedException e)
                 {
-                   // ignore item is already staged exception  
+                   // ignore item is already staged exception   
                 }   
             }
             else if (Directory.Exists(entry))

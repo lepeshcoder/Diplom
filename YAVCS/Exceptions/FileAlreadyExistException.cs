@@ -1,6 +1,12 @@
 ﻿namespace YAVCS.Exceptions;
 
-public class FileAlreadyExist : Exception
+public class FileAlreadyExistException : Exception
 {
-    
+    public FileAlreadyExistException()
+    {
+    }
+
+    public FileAlreadyExistException(string? message) : base(message)
+    {
+    }
 }

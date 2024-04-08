@@ -62,6 +62,13 @@ public static class App
                 new LogCommand(Services.GetRequiredService<INavigatorService>(),
                     Services.GetRequiredService<IBranchService>(),
                     Services.GetRequiredService<ICommitService>())
+            },
+            {
+                "restore",
+                new RestoreCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<IBlobService>(),
+                    Services.GetRequiredService<IHashService>())
             }
         };
     }
