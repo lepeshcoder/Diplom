@@ -11,5 +11,7 @@ public interface IIndexService
     void SaveChanges();
     Dictionary<string,IndexRecord> GetRecords();
     bool IsIndexEmpty();
-  
+
+    void ClearIndex();
+
 }

@@ -69,5 +69,9 @@ public class IndexService : IIndexService
         return _recordsByPath.Count == 0;
     }
 
-  
+    public void ClearIndex()
+    {
+        _recordsByPath.Clear();
+        SaveChanges();
+    }
 }

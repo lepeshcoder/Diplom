@@ -69,7 +69,17 @@ public static class App
                     Services.GetRequiredService<IIndexService>(),
                     Services.GetRequiredService<IBlobService>(),
                     Services.GetRequiredService<IHashService>())
+            },
+            {
+                "reset",
+                new ResetCommand(Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<IBlobService>())
             }
+            
         };
     }
 

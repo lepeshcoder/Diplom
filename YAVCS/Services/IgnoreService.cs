@@ -16,7 +16,7 @@ public class IgnoreService : IIgnoreService
     private readonly HashSet<string> _ignoreDirectoryRules = [".yavcs"];
     private readonly HashSet<string> _ignoreExtensionRules = [];
 
-    private const string DirectoryRulePattern = @"^(.+)/$";
+    private const string DirectoryRulePattern = @"^(.+)\$";
     private const string ExtensionRulePattern = @"^\*(\..+)$";
     
 
@@ -54,7 +54,7 @@ public class IgnoreService : IIgnoreService
     public bool IsItemIgnored(string itemRelativePath)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        var itemAbsolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + '\\' + itemRelativePath;
+        var itemAbsolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
         
         if (Directory.Exists(itemAbsolutePath))
         {
