@@ -130,7 +130,7 @@ public class ResetCommand : Command,ICommand
                 foreach (var indexRecord in newHeadCommitIndexRecords.Values)
                 {
                     _indexService.AddRecord(indexRecord);
-                }
+                } 
                 _indexService.SaveChanges();
                 
                 //reset working tree

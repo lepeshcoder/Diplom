@@ -41,7 +41,8 @@ public static class App
                  new StatusCommand(Services.GetRequiredService<INavigatorService>(),
                      Services.GetRequiredService<IIndexService>(),
                      Services.GetRequiredService<IHashService>(),
-                     Services.GetRequiredService<ICommitService>())
+                     Services.GetRequiredService<ICommitService>(),
+                     Services.GetRequiredService<IBranchService>())
             },
             {
                 "unstage",
@@ -78,6 +79,20 @@ public static class App
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<IIndexService>(),
                     Services.GetRequiredService<IBlobService>())
+            },
+            {
+                "branch",
+                new BranchCommand(Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<INavigatorService>())
+            },
+            {
+                "switch",
+                new SwitchCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<IBlobService>(),
+                    Services.GetRequiredService<ICommitService>())
             }
             
         };

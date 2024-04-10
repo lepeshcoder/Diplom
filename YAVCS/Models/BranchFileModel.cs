@@ -12,6 +12,12 @@ public class BranchFileModel
         CommitHash = commitHash;
     }
 
+    public BranchFileModel(string branchFileAbsolutePath)
+    {
+        Name = Path.GetFileName(branchFileAbsolutePath);
+        CommitHash = File.ReadAllText(branchFileAbsolutePath);
+    }
+
     public override string ToString()
     {
         return CommitHash;

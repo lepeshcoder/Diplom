@@ -44,4 +44,28 @@ public class BranchService : IBranchService
         var branchFilePath = vcsRootDirectoryNavigator!.HeadsDirectory + Path.DirectorySeparatorChar + newBranch.Name;
         File.WriteAllText(branchFilePath,newBranch.ToString());
     }
+
+    public List<BranchFileModel> GetAllBranches()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var branchFiles = Directory.GetFiles(vcsRootDirectoryNavigator!.HeadsDirectory);
+        return branchFiles.Select(branchFile => new BranchFileModel(branchFile)).ToList();
+    }
+
+    public BranchFileModel? GetBranchByName(string name)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var branchFilePath = vcsRootDirectoryNavigator!.HeadsDirectory + Path.DirectorySeparatorChar + name;
+        return !File.Exists(branchFilePath) ? null : new BranchFileModel(branchFilePath);
+    }
+
+    public void DeleteBranch(string name)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var branchFilePath = vcsRootDirectoryNavigator!.HeadsDirectory + Path.DirectorySeparatorChar + name;
+        if (File.Exists(branchFilePath))
+        {
+            File.Delete(branchFilePath);
+        }
+    }
 }

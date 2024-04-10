@@ -12,6 +12,7 @@ public class StatusCommand : Command,ICommand
     private readonly IIndexService _indexService;
     private readonly IHashService _hashService;
     private readonly ICommitService _commitService;
+    private readonly IBranchService _branchService;
 
     private readonly List<string> _stagedItems = [];
     private readonly List<string> _unStagedItems = [];
@@ -28,12 +29,13 @@ public class StatusCommand : Command,ICommand
     }
 
     public StatusCommand(INavigatorService navigatorService, IIndexService indexService,
-        IHashService hashService, ICommitService commitService)
+        IHashService hashService, ICommitService commitService, IBranchService branchService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
         _hashService = hashService;
         _commitService = commitService;
+        _branchService = branchService;
     }
 
     public string Description => "Show status of working tree";
@@ -60,8 +62,13 @@ public class StatusCommand : Command,ICommand
                 {
                     throw new RepositoryNotFoundException("StatusCommand.Execute");
                 }
+
+                var activeBranch = _branchService.GetActiveBranch();
+                var activeBranchName = activeBranch?.Name ?? "Master";
                 
                 GetStatusInfo();
+
+                Console.WriteLine($"On branch {activeBranchName}\n");
                 
                 Console.WriteLine("Staged Items:");
                 foreach (var item in _stagedItems) Console.WriteLine(item);

@@ -11,4 +11,10 @@ public interface IBranchService
     void UpdateBranch(string name, CommitFileModel commit);
 
     void CreateBranch(BranchFileModel newBranch);
+
+    List<BranchFileModel> GetAllBranches();
+
+    BranchFileModel? GetBranchByName(string name);
+
+    void DeleteBranch(string name);
 }

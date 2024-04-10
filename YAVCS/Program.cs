@@ -11,6 +11,10 @@
 //TODO: Parallel executing and smart work with index without rewriting file every time
 
 //TODO: fix ignore service
+    
+//TODO: DETACHED HEAD 
+
+//TODO: branch --delete
 
 App.Configure();
 App.Run(args);
