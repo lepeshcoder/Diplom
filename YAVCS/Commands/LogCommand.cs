@@ -62,7 +62,7 @@ public class LogCommand : Command,ICommand
                     throw new RepositoryNotFoundException("Log.Execute");
                 }
                 var activeBranch = _branchService.GetActiveBranch();
-                var currentCommit = _commitService.GetCommitByHash(activeBranch?.CommitHash ?? "null");
+                var currentCommit = _commitService.GetCommitByHash(activeBranch.CommitHash);
                 if (currentCommit == null)
                 {
                     Console.WriteLine("Repository doesn't have any commits");
@@ -72,7 +72,9 @@ public class LogCommand : Command,ICommand
                 while (currentCommit != null)
                 {
                     ShowCommitInfo(currentCommit,allBranches);
-                    currentCommit = _commitService.GetCommitByHash(currentCommit.ParentCommitHash);
+                    var parentCommit = _commitService.GetCommitByHash(currentCommit.ParentCommitHash!);
+                    if (parentCommit == null) break;
+                    currentCommit = parentCommit;
                 }
                 break;
             }

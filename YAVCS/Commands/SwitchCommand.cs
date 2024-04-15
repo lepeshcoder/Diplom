@@ -75,25 +75,27 @@ public class SwitchCommand : Command,ICommand
                 }
 
                 var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch?.Name ?? "Master";
+                var activeBranchName = activeBranch.Name;
                 if (activeBranchName == branchToSwitchName)
                 {
                     throw new ArgumentException($"Already on branch {activeBranchName}");
                 }
 
-                var activeBranchCommitHash = activeBranch?.CommitHash ?? "ZeroCommit";
-
-                if (branchToSwitch.CommitHash == "ZeroCommit")
+                var activeBranchCommitHash = activeBranch.CommitHash;
+                
+                if (_branchService.IsDetachedHead())
                 {
-                    throw new ArgumentException("Cannot Switch to ZeroCommit");
+                    var origHead = _branchService.GetDetachedHeadCommitHash();
+                    _branchService.UpdateBranch(activeBranchName,origHead);
+                    _branchService.SetDetachedHead("");
                 }
-
+                
                 var branchToSwitchHeadCommit = _commitService.GetCommitByHash(branchToSwitch.CommitHash);
                 
                 if (activeBranchCommitHash != branchToSwitch.CommitHash)
                 {
                     // reset index
-                    var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(branchToSwitchHeadCommit.TreeHash);
+                    var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(branchToSwitchHeadCommit!.TreeHash);
                     _indexService.ClearIndex();
                     foreach (var indexRecord in newHeadCommitIndexRecords.Values)
                     {

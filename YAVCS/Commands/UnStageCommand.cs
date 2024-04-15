@@ -6,8 +6,7 @@ namespace YAVCS.Commands;
 
 public class UnStageCommand : Command,ICommand
 {
-
-
+    
     private readonly INavigatorService _navigatorService;
     private readonly IIndexService _indexService;
 
@@ -61,7 +60,7 @@ public class UnStageCommand : Command,ICommand
             case CommandCases.DefaultCase:
             {
                 var itemRelativePath = args[0];
-                var itemAbsolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + '\\' + itemRelativePath;
+                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + '\\' + itemRelativePath;
                 if (File.Exists(itemAbsolutePath))
                 {
                     UnStageFile(itemRelativePath);
@@ -75,7 +74,7 @@ public class UnStageCommand : Command,ICommand
             }
             case CommandCases.UnStageAll:
             {
-                var repositoryRootDirectory = vcsRootDirectoryNavigator!.RepositoryRootDirectory;
+                var repositoryRootDirectory = vcsRootDirectoryNavigator.RepositoryRootDirectory;
                 UnStageDirectory(repositoryRootDirectory);
                 break;
             }
@@ -110,7 +109,6 @@ public class UnStageCommand : Command,ICommand
                 {
                     
                 }
-               
             }
             else if (Directory.Exists(entry))
             {

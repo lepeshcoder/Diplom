@@ -82,7 +82,7 @@ public class BranchCommand : Command,ICommand
                     Console.WriteLine($"Branch {newBranchName} already exist");
                 }
                 var activeBranch = _branchService.GetActiveBranch();
-                var commitHash = activeBranch == null ? "ZeroCommit" : activeBranch.CommitHash;
+                var commitHash = activeBranch.CommitHash;
                 _branchService.CreateBranch(new BranchFileModel(newBranchName,commitHash));
                 break;
             }
@@ -95,11 +95,18 @@ public class BranchCommand : Command,ICommand
                 }
                 var branchToDeleteName = args[1];
                 var branchToDelete = _branchService.GetBranchByName(branchToDeleteName);
+                var activeBranch = _branchService.GetActiveBranch();
+                var activeBranchName = activeBranch.Name;
                 if (branchToDelete == null)
                 {
                     throw new ArgumentException($"Branch {branchToDeleteName} doesn't exist");
                 }
 
+                if (activeBranchName == branchToDeleteName)
+                {
+                    throw new ArgumentException("Cannot delete active Branch");
+                }
+                
                 if (branchToDeleteName == "Master")
                 {
                     throw new ArgumentException("Can't Delete Branch Master");

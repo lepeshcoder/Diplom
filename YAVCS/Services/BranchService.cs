@@ -13,14 +13,14 @@ public class BranchService : IBranchService
         _navigatorService = navigatorService;
     }
 
-    public BranchFileModel? GetActiveBranch()
+    public BranchFileModel GetActiveBranch()
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var headFilePath = vcsRootDirectoryNavigator!.HeadFile;
         var activeBranchName = File.ReadAllText(headFilePath);
         var activeBranchFilePath =  vcsRootDirectoryNavigator.HeadsDirectory + Path.DirectorySeparatorChar + activeBranchName;
         var commitHash = File.ReadAllText(activeBranchFilePath);
-        return commitHash == "ZeroCommit" ? null : new BranchFileModel(activeBranchName, commitHash);
+        return new BranchFileModel(activeBranchName, commitHash);
     }
 
     public void SetActiveBranch(BranchFileModel branch)
@@ -31,11 +31,11 @@ public class BranchService : IBranchService
     }
 
 
-    public void UpdateBranch(string name, CommitFileModel commit)
+    public void UpdateBranch(string name, string commitHash)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var branchFilePath = vcsRootDirectoryNavigator!.HeadsDirectory + Path.DirectorySeparatorChar + name;
-        File.WriteAllText(branchFilePath,commit.Hash);
+        File.WriteAllText(branchFilePath,commitHash);
     }
 
     public void CreateBranch(BranchFileModel newBranch)
@@ -67,5 +67,23 @@ public class BranchService : IBranchService
         {
             File.Delete(branchFilePath);
         }
+    }
+
+    public void SetDetachedHead(string hashCommit)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        File.WriteAllText(vcsRootDirectoryNavigator!.DetachedHeadFile,hashCommit);
+    }
+
+    public string GetDetachedHeadCommitHash()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        return File.ReadAllText(vcsRootDirectoryNavigator!.DetachedHeadFile);
+    }
+
+    public bool IsDetachedHead()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        return File.ReadAllText(vcsRootDirectoryNavigator!.DetachedHeadFile).Length != 0;
     }
 }

@@ -60,6 +60,11 @@ public class TreeService : ITreeService
         return recordsByPath;
     }
 
+    public void CreateTree(TreeFileModel tree)
+    {
+        WriteTree(tree);
+    }
+
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")
     {
         var temp = "";

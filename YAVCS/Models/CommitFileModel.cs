@@ -10,9 +10,9 @@ public class CommitFileModel
 
     public string Hash;
 
-    public string ParentCommitHash;
+    public string? ParentCommitHash;
 
-    public CommitFileModel(string treeHash, DateTime createdAt, string message,string hash,string parentCommitHash)
+    public CommitFileModel(string treeHash, DateTime createdAt, string message,string hash,string? parentCommitHash)
     {
         TreeHash = treeHash;
         CreatedAt = createdAt;

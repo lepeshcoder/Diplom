@@ -76,8 +76,14 @@ public class ResetCommand : Command,ICommand
                     throw new CommitNotFoundException(commitHash);
                 }
                 var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch?.Name ?? "Master";
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit);
+                var activeBranchName = activeBranch.Name;
+                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
+                // set detached head
+                if (!_branchService.IsDetachedHead())
+                {
+                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                }
+
                 break;
             }
             case CommandCases.MixedReset:
@@ -94,8 +100,8 @@ public class ResetCommand : Command,ICommand
                     throw new CommitNotFoundException(commitHash);
                 }
                 var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch?.Name ?? "Master";
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit);
+                var activeBranchName = activeBranch.Name ;
+                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
 
                 var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(newHeadCommit.TreeHash);
                 _indexService.ClearIndex();
@@ -104,6 +110,11 @@ public class ResetCommand : Command,ICommand
                     _indexService.AddRecord(indexRecord);
                 }
                 _indexService.SaveChanges();
+                if (!_branchService.IsDetachedHead())
+                {
+                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                }
+
                 break;
             }
             case CommandCases.HardReset:
@@ -121,8 +132,8 @@ public class ResetCommand : Command,ICommand
                 }
                 // update branch
                 var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch?.Name ?? "Master";
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit);
+                var activeBranchName = activeBranch.Name;
+                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
 
                 // reset index
                 var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(newHeadCommit.TreeHash);
@@ -161,8 +172,12 @@ public class ResetCommand : Command,ICommand
                     using (var fs = File.Create(absolutePath)) {};
                     File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
                 }
-                
-                
+
+                if (!_branchService.IsDetachedHead())
+                {
+                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                }
+
                 break;
             }
         }

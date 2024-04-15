@@ -76,10 +76,9 @@ public class CommitCommand : Command, ICommand
                 var parentCommitHash = (activeBranch == null)? "ZerroCommit" : activeBranch.CommitHash;
                 var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,parentCommitHash);
                 
-                _branchService.UpdateBranch((activeBranch == null)? "Master" : activeBranch.Name,newCommit);
+                _branchService.UpdateBranch((activeBranch == null)? "Master" : activeBranch.Name,newCommit.Hash);
                 _garbageCollectorService.CollectGarbage();
-                //TODO: CLEAR INDEX?
-                break; 
+                 break; 
             }
         }
     }

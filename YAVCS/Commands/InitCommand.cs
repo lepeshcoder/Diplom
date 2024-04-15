@@ -32,12 +32,19 @@ public class InitCommand : Command,ICommand
     private readonly INavigatorService _navigatorService;
     private readonly IConfigService _configService;
     private readonly IBranchService _branchService;
+    private readonly ICommitService _commitService;
+    private readonly ITreeService _treeService;
+    private readonly IHashService _hashService;
 
-    public InitCommand(INavigatorService navigatorService, IConfigService configService, IBranchService branchService)
+    public InitCommand(INavigatorService navigatorService, IConfigService configService, 
+        IBranchService branchService, ICommitService commitService, ITreeService treeService, IHashService hashService)
     {
         _navigatorService = navigatorService;
         _configService = configService;
         _branchService = branchService;
+        _commitService = commitService;
+        _treeService = treeService;
+        _hashService = hashService;
     }
 
     public void Execute(string[] args)
@@ -64,11 +71,12 @@ public class InitCommand : Command,ICommand
                 // if directory is a part of repository 
                 if (vcsRootDirectoryNavigator != null)
                 {
-                    Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.VcsRootDirectory);
+                    Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.RepositoryRootDirectory);
                     return;
                 }
                 // otherwise create .yavcs directory
                 CreateVcsRootDirectory(workingDirectory);
+                Console.WriteLine($"Repository successfully created at {workingDirectory}");
                 break;
             }
         }
@@ -92,11 +100,19 @@ public class InitCommand : Command,ICommand
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.DetachedHeadFile )) {};
+
+        // create zeroCommit
+        var zeroCommitTree = new TreeFileModel("zeroCommitTree", new Dictionary<string, ChildItemModel>(),
+            _hashService.GetHash("ZeroCommit"));
+        _treeService.CreateTree(zeroCommitTree);
+        var zeroCommit = _commitService.CreateCommit(zeroCommitTree.Hash, DateTime.Now, "ZeroCommit", "null");
+        
         
         // Write default data to config file
         _configService.ReWriteConfig(new ConfigFileModel("user","email",DateTime.Now));
 
-        var masterBranch = new BranchFileModel("Master", "ZeroCommit");
+        var masterBranch = new BranchFileModel("Master", zeroCommit.Hash);
         _branchService.CreateBranch(masterBranch);
         _branchService.SetActiveBranch(masterBranch);
     }

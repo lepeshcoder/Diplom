@@ -4,11 +4,11 @@ namespace YAVCS.Services.Contracts;
 
 public interface IBranchService
 {
-    BranchFileModel? GetActiveBranch();
+    BranchFileModel GetActiveBranch();
 
     void SetActiveBranch(BranchFileModel branch);
     
-    void UpdateBranch(string name, CommitFileModel commit);
+    void UpdateBranch(string name, string commitHash);
 
     void CreateBranch(BranchFileModel newBranch);
 
@@ -17,4 +17,10 @@ public interface IBranchService
     BranchFileModel? GetBranchByName(string name);
 
     void DeleteBranch(string name);
+
+    void SetDetachedHead(string hashCommit);
+
+    string GetDetachedHeadCommitHash();
+
+    bool IsDetachedHead();
 }

@@ -28,5 +28,6 @@ public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
     public string TreesDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.TreesDirectory;
     public string CommitsDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.CommitsDirectory;
     public string LogFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.LogFile;
+    public string DetachedHeadFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.DetachedHeadFile;
 
 }

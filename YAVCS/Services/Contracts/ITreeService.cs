@@ -10,4 +10,6 @@ public interface ITreeService
    TreeFileModel GetTreeByHash(string rootTreeHash);
 
    Dictionary<string, IndexRecord> GetTreeRecordsByPath(string treeHash);
+
+   void CreateTree(TreeFileModel tree);
 }

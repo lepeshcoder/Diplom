@@ -16,7 +16,7 @@ public class IgnoreService : IIgnoreService
     private readonly HashSet<string> _ignoreDirectoryRules = [".yavcs"];
     private readonly HashSet<string> _ignoreExtensionRules = [];
 
-    private const string DirectoryRulePattern = @"^(.+)\$";
+    private const string DirectoryRulePattern = @"^(.*)\\$";
     private const string ExtensionRulePattern = @"^\*(\..+)$";
     
 
@@ -46,7 +46,6 @@ public class IgnoreService : IIgnoreService
 
             _ignoreFileRules.Add(rule);
         }
-        
     }
 
     // Method that checks should item ignored
@@ -58,7 +57,7 @@ public class IgnoreService : IIgnoreService
         
         if (Directory.Exists(itemAbsolutePath))
         {
-            if (_ignoreDirectoryRules.Any(rule => rule.Equals(itemRelativePath)))
+            if (_ignoreDirectoryRules.Any(itemRelativePath.StartsWith))
             {
                 return true;
             }

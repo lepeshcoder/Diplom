@@ -45,4 +45,6 @@ public static class FileSystemConstants
     public const string CommitsDirectory = "commits";
     // log file
     public const string LogFile = "log";
+    // detachedHead file
+    public const string DetachedHeadFile = "origHead";
 }

@@ -19,7 +19,7 @@ public class CommitService : ICommitService
         _treeService = treeService;
     }
 
-    public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message,string parentCommitHash)
+    public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message,string? parentCommitHash)
     {
         var commitHash = _hashService.GetHash(treeHash + createdAt + message);
         var newCommit = new CommitFileModel(treeHash, createdAt, message,commitHash,parentCommitHash);
@@ -39,7 +39,6 @@ public class CommitService : ICommitService
     public Dictionary<string,IndexRecord> GetHeadRecordsByPath()
     {
         var activeBranch = _branchService.GetActiveBranch();
-        if (activeBranch == null) return new Dictionary<string, IndexRecord>();
         var headCommit = GetCommitByHash(activeBranch.CommitHash);
         return _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
     }

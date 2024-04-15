@@ -26,7 +26,10 @@ public static class App
                 "init", 
                 new InitCommand(Services.GetRequiredService<INavigatorService>(),
                     Services.GetRequiredService<IConfigService>(),
-                    Services.GetRequiredService<IBranchService>())
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<IHashService>())
             },
             {
                 "add",
@@ -93,6 +96,14 @@ public static class App
                     Services.GetRequiredService<IIndexService>(),
                     Services.GetRequiredService<IBlobService>(),
                     Services.GetRequiredService<ICommitService>())
+            },
+            {
+                "diff",
+                new DiffCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<IBlobService>())
             }
             
         };

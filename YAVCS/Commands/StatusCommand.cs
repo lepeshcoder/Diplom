@@ -64,7 +64,7 @@ public class StatusCommand : Command,ICommand
                 }
 
                 var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch?.Name ?? "Master";
+                var activeBranchName = activeBranch.Name;
                 
                 GetStatusInfo();
 

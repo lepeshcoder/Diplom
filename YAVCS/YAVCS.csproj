@@ -11,4 +11,8 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="C:\Users\nelep\OneDrive\Рабочий стол\kal2\Diffs\src\Diffs.csproj" />
+    </ItemGroup>
+
 </Project>

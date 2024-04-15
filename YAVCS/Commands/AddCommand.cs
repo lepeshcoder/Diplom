@@ -65,7 +65,7 @@ public class AddCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new RepositoryNotFoundException("Not a part of repository");
                 }
                 // check for item exists
                 var itemRelativePath = args[0];
@@ -172,7 +172,7 @@ public class AddCommand : Command,ICommand
         }
     }
 
-    private void StageDirectory(string absolutePath)
+    private void StageDirectory(string absolutePath) 
     {
         
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
