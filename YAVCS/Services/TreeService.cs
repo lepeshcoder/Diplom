@@ -34,6 +34,19 @@ public class TreeService : ITreeService
         return rootTreeHash;
     }
 
+    public string CreateTreeByRecords(Dictionary<string,IndexRecord> recordsByPath)
+    {
+        var treesByRelativePath = FillTreesDictionary(recordsByPath.Values.ToList());
+        var rootTree = treesByRelativePath[""];
+        var rootTreeHash = GetTreeHash(rootTree,treesByRelativePath);
+        //writing after GetTreeHash because all tree hashes computes recursively
+        foreach (var tree in treesByRelativePath.Values)
+        {
+            WriteTree(tree);
+        }
+        return rootTreeHash;
+    }
+
     public TreeFileModel GetTreeByHash(string treeHash)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();

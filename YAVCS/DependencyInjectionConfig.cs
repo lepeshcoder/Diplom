@@ -20,6 +20,7 @@ public static class DependencyInjectionConfig
             .AddSingleton<ICommitService,CommitService>()
             .AddSingleton<IGarbageCollectorService,GarbageCollectorService>()
             .AddSingleton<IBranchService,BranchService>()
+            .AddSingleton<IMergeService,MergeService>()
             .BuildServiceProvider();
     }
 }

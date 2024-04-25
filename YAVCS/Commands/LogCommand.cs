@@ -72,10 +72,13 @@ public class LogCommand : Command,ICommand
                 while (currentCommit != null)
                 {
                     ShowCommitInfo(currentCommit,allBranches);
-                    var parentCommit = _commitService.GetCommitByHash(currentCommit.ParentCommitHash!);
+                    //TODO: СДЕЛАТЬ ЧТО ТО С ЛОГОМ
+                    // check for zero commit
+                    if (currentCommit.ParentCommitHashes.Count == 0) return;
+                    var parentCommit = _commitService.GetCommitByHash(currentCommit.ParentCommitHashes[0]);
                     if (parentCommit == null) break;
                     currentCommit = parentCommit;
-                }
+                } 
                 break;
             }
         }

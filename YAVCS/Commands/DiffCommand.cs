@@ -82,15 +82,18 @@ public class DiffCommand : Command,ICommand
                 var commitToCompareIndexRecords = _treeService.GetTreeRecordsByPath(commitToCompare.TreeHash);
                 
                 // Элементы, которые есть только в первой коллекции
-                var newFiles  = headCommitIndexRecords.Where(pair => !commitToCompareIndexRecords.ContainsKey(pair.Key))
+                var newFiles  = headCommitIndexRecords
+                    .Where(pair => !commitToCompareIndexRecords.ContainsKey(pair.Key))
                     .ToDictionary(pair => pair.Key, pair => pair.Value);
 
                 // Элементы, которые есть только во второй коллекции
-                var deletedFiles = commitToCompareIndexRecords.Where(pair => !headCommitIndexRecords.ContainsKey(pair.Key))
+                var deletedFiles = commitToCompareIndexRecords
+                    .Where(pair => !headCommitIndexRecords.ContainsKey(pair.Key))
                     .ToDictionary(pair => pair.Key, pair => pair.Value);
 
                 // Элементы, которые есть в обеих коллекциях
-                var modifiedFiles = headCommitIndexRecords.Where(pair => commitToCompareIndexRecords.ContainsKey(pair.Key))
+                var modifiedFiles = headCommitIndexRecords
+                    .Where(pair => commitToCompareIndexRecords.ContainsKey(pair.Key))
                     .ToDictionary(pair => pair.Key, pair => pair.Value);
 
                 foreach (var newFile in newFiles.Values)
@@ -142,7 +145,7 @@ public class DiffCommand : Command,ICommand
                 .Concat(linesToDelete)
                 .Concat(linesToAdd)
                 .Concat(linesAfterDifference)
-                .ToArray()) + "\n\n\n\n";
+                .ToArray()) + "\n\n";
         }
         return diff;
     }

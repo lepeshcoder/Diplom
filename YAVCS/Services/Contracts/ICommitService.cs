@@ -4,7 +4,7 @@ namespace YAVCS.Services.Contracts;
 
 public interface ICommitService
 {
-    CommitFileModel CreateCommit(string treeHash,DateTime createdAt, string message,string? parentCommitHash);
+    CommitFileModel CreateCommit(string treeHash,DateTime createdAt, string message,List<string> parentCommitHashes);
 
     CommitFileModel? GetCommitByHash(string commitHash);
 

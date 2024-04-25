@@ -19,7 +19,7 @@ public class CommitService : ICommitService
         _treeService = treeService;
     }
 
-    public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message,string? parentCommitHash)
+    public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message,List<string> parentCommitHash)
     {
         var commitHash = _hashService.GetHash(treeHash + createdAt + message);
         var newCommit = new CommitFileModel(treeHash, createdAt, message,commitHash,parentCommitHash);

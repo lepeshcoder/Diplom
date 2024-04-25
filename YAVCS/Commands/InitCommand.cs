@@ -106,7 +106,7 @@ public class InitCommand : Command,ICommand
         var zeroCommitTree = new TreeFileModel("zeroCommitTree", new Dictionary<string, ChildItemModel>(),
             _hashService.GetHash("ZeroCommit"));
         _treeService.CreateTree(zeroCommitTree);
-        var zeroCommit = _commitService.CreateCommit(zeroCommitTree.Hash, DateTime.Now, "ZeroCommit", "null");
+        var zeroCommit = _commitService.CreateCommit(zeroCommitTree.Hash, DateTime.Now, "ZeroCommit", []);
         
         
         // Write default data to config file

@@ -73,10 +73,10 @@ public class CommitCommand : Command, ICommand
                 var activeBranch = _branchService.GetActiveBranch();
                 var rootTreeHash = _treeService.CreateTreeByIndex();
                 var commitMessage = args.Aggregate("", (current, arg) => current + arg + " ");
-                var parentCommitHash = (activeBranch == null)? "ZerroCommit" : activeBranch.CommitHash;
-                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,parentCommitHash);
+                var parentCommitHash = activeBranch.CommitHash;
+                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,[parentCommitHash]);
                 
-                _branchService.UpdateBranch((activeBranch == null)? "Master" : activeBranch.Name,newCommit.Hash);
+                _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
                 _garbageCollectorService.CollectGarbage();
                  break; 
             }

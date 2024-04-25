@@ -104,6 +104,15 @@ public static class App
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<IBranchService>(),
                     Services.GetRequiredService<IBlobService>())
+            },
+            {
+                "merge",
+                new MergeCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<IMergeService>(),
+                    Services.GetRequiredService<IBlobService>())
             }
             
         };
