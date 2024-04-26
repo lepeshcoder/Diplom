@@ -1,4 +1,5 @@
-﻿using YAVCS;
+﻿using System.Net;
+using YAVCS;
 
 //TODO: Add logging in each command
 //TODO: PackFiles

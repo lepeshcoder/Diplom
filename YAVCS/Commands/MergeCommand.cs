@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using spkl.Diffs;
+using Verano.Diff3Way;
 using YAVCS.Commands.Contracts;
 using YAVCS.Exceptions;
 using YAVCS.Models;
@@ -15,9 +16,12 @@ public class MergeCommand : Command,ICommand
     private readonly ICommitService _commitService;
     private readonly IMergeService _mergeService;
     private readonly IBlobService _blobService;
+    private readonly IHashService _hashService;
+    private readonly IIndexService _indexService;
 
     public MergeCommand(INavigatorService navigatorService, IBranchService branchService,
-        ITreeService treeService, ICommitService commitService, IMergeService mergeService, IBlobService blobService)
+        ITreeService treeService, ICommitService commitService, IMergeService mergeService,
+        IBlobService blobService, IHashService hashService, IIndexService indexService)
     {
         _navigatorService = navigatorService;
         _branchService = branchService;
@@ -25,6 +29,8 @@ public class MergeCommand : Command,ICommand
         _commitService = commitService;
         _mergeService = mergeService;
         _blobService = blobService;
+        _hashService = hashService;
+        _indexService = indexService;
     }
 
     private enum CommandCases
@@ -100,41 +106,77 @@ public class MergeCommand : Command,ICommand
                 if (commonAncestor.Hash == activeBranchHeadCommit!.Hash)
                 {
                     Console.WriteLine("Fast forward merge");
-                    _branchService.UpdateBranch(activeBranch.Name,branchToMergeHeadCommit!.Hash);
+                    _branchService.UpdateBranch(activeBranch.Name,branchToMergeHeadCommit.Hash);
+                    _indexService.ResetIndexToState(branchToMergeHeadCommit.TreeHash);
+                    _treeService.ResetWorkingDirectoryToState(branchToMergeHeadCommit.TreeHash);
                     return;
                 }
                 
                 // default (3-way merge) case
                 // generate patches from merge base to 2 branches head commits
-                var commonAncestorToActiveBranchPatch = GeneratePatch(commonAncestor, activeBranchHeadCommit);
-                var commonAncestorToBranchToMergePatch = GeneratePatch(commonAncestor, branchToMergeHeadCommit);
+                var commonAncestorToActiveBranchPatch = GeneratePatch(commonAncestor, activeBranchHeadCommit,activeBranch.Name);
+                var commonAncestorToBranchToMergePatch = GeneratePatch(commonAncestor, branchToMergeHeadCommit,branchToMerge.Name);
                 
                 // apply patches using 3-way merge algorithm
-                
-                // update active branch
-                
-                
-               
-                
-                
-                
-                
-               
-                
-                
-                
-                
-                // получаем записи индекса двух ветвей
-                // проверка на наличчие виртуального коммита(если есть и нет merge конфликтов) то сливаем ветки
-                // создаём виртуальный коммит: Заносим в его индекс все файлы без merge конфликтов
-                // перезаписываем файлы с merge конфликтами в форме для решения конфликтов
-                
+                var mergeResult = ApplyPatches3Way(
+                    commonAncestor,
+                    commonAncestorToActiveBranchPatch,
+                    commonAncestorToBranchToMergePatch);
+
+                // if merge has no conflicts
+                if (mergeResult.ConflictPaths.Count == 0)
+                {
+                    var mergeCommitRootTreeHash = _treeService.CreateTreeByRecords(mergeResult.IndexRecords);
+                    var mergeCommit = _commitService.CreateCommit(mergeCommitRootTreeHash,
+                        DateTime.Now,
+                        $"merge {branchToMerge.Name} into {activeBranch.Name}",
+                        [activeBranchHeadCommit.Hash, branchToMergeHeadCommit.Hash]);
+                    _branchService.UpdateBranch(activeBranch.Name,mergeCommit.Hash);
+                    
+                    //reset working tree
+                    var allDirectories = Directory.GetDirectories(vcsRootDirectoryNavigator.RepositoryRootDirectory);
+                    var allFiles = Directory.GetFiles(vcsRootDirectoryNavigator.RepositoryRootDirectory);
+
+                    foreach (var file in allFiles)
+                    {
+                        File.Delete(file);   
+                    }
+
+                    foreach (var directory in allDirectories)
+                    {
+                        if(directory != vcsRootDirectoryNavigator.VcsRootDirectory)
+                            Directory.Delete(directory,true);
+                    }
+
+                    foreach (var indexRecord in _treeService.GetTreeRecordsByPath(mergeCommitRootTreeHash).Values)
+                    {
+                        var absolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory +
+                                           Path.DirectorySeparatorChar + indexRecord.RelativePath;
+                    
+                        var directoryName = Path.GetDirectoryName(absolutePath);
+                        if (directoryName != null)
+                        {
+                            Directory.CreateDirectory(directoryName);
+                        }
+                        using (var fs = File.Create(absolutePath)) {};
+                        File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Merge Failed, there are some merge Conflicts in:\n");
+                    foreach (var conflictPath in mergeResult.ConflictPaths)
+                    {
+                        Console.WriteLine(conflictPath);
+                    }
+                    _mergeService.SetMergeConflictSign();
+                }
                 break;
             }
         }
     }
 
-    private PatchModel GeneratePatch(CommitFileModel baseCommit, CommitFileModel modifiedCommit)
+    private PatchModel GeneratePatch(CommitFileModel baseCommit, CommitFileModel modifiedCommit,string modifiedBranchName)
     {
         var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(baseCommit.TreeHash);
         var modifiedCommitIndexRecords = _treeService.GetTreeRecordsByPath(modifiedCommit.TreeHash);
@@ -146,59 +188,97 @@ public class MergeCommand : Command,ICommand
         var deletedFiles = baseCommitIndexRecords
             .Where(pair => !modifiedCommitIndexRecords.ContainsKey(pair.Key))
             .ToDictionary(pair => pair.Key, pair => pair.Value);
-
+        
+        //todo: readlly modified add hash 
         var modifiedFiles = modifiedCommitIndexRecords
             .Where(pair => baseCommitIndexRecords.ContainsKey(pair.Key))
-            .Select(pair => pair.Value)
-            .ToList();
-
-        var diffs = new List<MyersDiff<string>>();
+            .ToDictionary(pair => pair.Key, pair => pair.Value);
         
-        foreach (var modifiedFile in modifiedFiles)
-        {
-            var relativePath = modifiedFile.RelativePath;
-            var baseCommitFileBytes = _blobService.GetBlobData(baseCommitIndexRecords[relativePath].BlobHash);
-            var modifiedCommitFileBytes = _blobService.GetBlobData(modifiedCommitIndexRecords[relativePath].BlobHash); 
-            var baseCommitFileText =  Encoding.UTF8.GetString(baseCommitFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
-            var modifiedCommitFileText = Encoding.UTF8.GetString(modifiedCommitFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
-            diffs.Add(new MyersDiff<string>(baseCommitFileText, modifiedCommitFileText));
-        }
-
-        return new PatchModel(newFiles, deletedFiles, modifiedFiles, diffs);
+        
+        return new PatchModel(newFiles, deletedFiles, modifiedFiles,modifiedBranchName);
 
     }
 
-    private CommitFileModel ApplyPatch(CommitFileModel baseCommit, CommitFileModel patchFromCommit, PatchModel patch)
+    private MergeResultModel ApplyPatches3Way(CommitFileModel baseCommit, PatchModel firstBranchPatch, PatchModel secondBranchPatch)
     {
-        /*var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(baseCommit.TreeHash);
-        var patchFromCommitIndexRecords = _treeService.GetTreeRecordsByPath(patchFromCommit.TreeHash);
-        // add newFiles to Index
-        foreach (var fileToAdd in patch.FilesToAdd.Values)
+        var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(baseCommit.TreeHash);
+
+        foreach (var fileToAdd in firstBranchPatch.FilesToAdd.Values)
         {
-            baseCommitIndexRecords.Add(fileToAdd.RelativePath,fileToAdd); 
+            baseCommitIndexRecords.TryAdd(fileToAdd.RelativePath, fileToAdd);
         }
-        // remove deleted files from index
-        foreach (var fileToDelete in patch.FilesToDelete.Values)
+        foreach (var fileToAdd in secondBranchPatch.FilesToAdd.Values)
+        {
+            baseCommitIndexRecords.TryAdd(fileToAdd.RelativePath, fileToAdd);
+        }
+        foreach (var fileToDelete in firstBranchPatch.FilesToDelete.Values)
         {
             baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
         }
-
-        for (var i = 0; i < patch.ModifiedFiles.Count; i++)
+        foreach (var fileToDelete in secondBranchPatch.FilesToDelete.Values)
         {
-            var relativePath = patch.ModifiedFiles[i].RelativePath;
-            var baseCommitFileBytes = _blobService.GetBlobData(baseCommitIndexRecords[relativePath].BlobHash);
-            var patchFromCommitFileBytes = _blobService.GetBlobData(patchFromCommitIndexRecords[relativePath].BlobHash);
-            var baseCommitFileText =  Encoding.UTF8.GetString(baseCommitFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
-            var patchFromCommitFileText = Encoding.UTF8.GetString(patchFromCommitFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
-            
+            baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
         }
         
-        var virtualCommitRootTree = */
-        throw new NotImplementedException();
+        // file that modify only in first branch
+        var onlyModifiedInFirstBranchKeys = firstBranchPatch.ModifiedFiles.Keys.Except(secondBranchPatch.ModifiedFiles.Keys);
+        var onlyModifiedInSecondBranchKeys = secondBranchPatch.ModifiedFiles.Keys.Except(firstBranchPatch.ModifiedFiles.Keys);
+        var bothModifiedFilesKeys = firstBranchPatch.ModifiedFiles.Keys.Intersect(secondBranchPatch.ModifiedFiles.Keys);
 
+        foreach (var modifiedFileKey in onlyModifiedInFirstBranchKeys)
+        {
+            var indexRecord = firstBranchPatch.ModifiedFiles[modifiedFileKey];
+            baseCommitIndexRecords.Remove(modifiedFileKey);
+            baseCommitIndexRecords.Add(modifiedFileKey,indexRecord);
+        }
+        foreach (var modifiedFileKey in onlyModifiedInSecondBranchKeys)
+        {
+            var indexRecord = secondBranchPatch.ModifiedFiles[modifiedFileKey];
+            baseCommitIndexRecords.Remove(modifiedFileKey);
+            baseCommitIndexRecords.Add(modifiedFileKey,indexRecord);
+        }
+
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var conflictsPaths = new List<string>();
+        foreach (var bothModifiedFileKey in bothModifiedFilesKeys)
+        {
+            var firstBranchFileBytes =
+                _blobService.GetBlobData(firstBranchPatch.ModifiedFiles[bothModifiedFileKey].BlobHash);
+            var secondBranchFileBytes =
+                _blobService.GetBlobData(secondBranchPatch.ModifiedFiles[bothModifiedFileKey].BlobHash);
+            var baseCommitFileBytes =
+                _blobService.GetBlobData(baseCommitIndexRecords[bothModifiedFileKey].BlobHash);
+            var firstBranchFileLines = Encoding.UTF8.GetString(firstBranchFileBytes)
+                .Split([Environment.NewLine], StringSplitOptions.None);
+            var secondBranchFileLines = Encoding.UTF8.GetString(secondBranchFileBytes)
+                .Split([Environment.NewLine], StringSplitOptions.None);
+            var baseCommitFileLines = Encoding.UTF8.GetString(baseCommitFileBytes)
+                .Split([Environment.NewLine], StringSplitOptions.None);
+            var merge = new Merge();
+            var result =  merge.Merge3Way(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, 
+                firstBranchPatch.BranchName, "base", secondBranchPatch.BranchName);
+           
+            if (result.IsConflict)
+            {
+                var relativePath = baseCommitIndexRecords[bothModifiedFileKey].RelativePath;
+                var absolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + Path.DirectorySeparatorChar + relativePath;
+                File.Delete(absolutePath);
+                File.WriteAllLines(absolutePath,result.Result);
+                conflictsPaths.Add(relativePath);
+            }
+            else
+            {
+                var mergedFileText = string.Join('\n', result.Result);
+                var mergedFileHash = _hashService.GetHash(mergedFileText);
+                if (!_blobService.IsBlobExist(mergedFileHash))
+                {
+                    _blobService.CreateBlob(Encoding.UTF8.GetBytes(mergedFileText));
+                }
+                baseCommitIndexRecords.Remove(bothModifiedFileKey);
+                baseCommitIndexRecords.Add(bothModifiedFileKey,new IndexRecord(bothModifiedFileKey,mergedFileHash));
+            }
+        }
+        
+        return new MergeResultModel(baseCommitIndexRecords,conflictsPaths);
     }
 }

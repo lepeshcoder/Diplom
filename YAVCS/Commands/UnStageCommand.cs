@@ -9,11 +9,19 @@ public class UnStageCommand : Command,ICommand
     
     private readonly INavigatorService _navigatorService;
     private readonly IIndexService _indexService;
+    private readonly IBranchService _branchService;
+    private readonly ITreeService _treeService;
+    private readonly ICommitService _commitService;
+    
 
-    public UnStageCommand(INavigatorService navigatorService, IIndexService indexService)
+    public UnStageCommand(INavigatorService navigatorService, IIndexService indexService,
+        IBranchService branchService, ITreeService treeService, ICommitService commitService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
+        _branchService = branchService;
+        _treeService = treeService;
+        _commitService = commitService;
     }
 
     private enum CommandCases
@@ -21,7 +29,8 @@ public class UnStageCommand : Command,ICommand
         SyntaxError = 0,
         HelpCase = 1,
         DefaultCase = 2,
-        UnStageAll = 3
+        UnStageAll = 3,
+        ForceCase= 4
     }
     
     protected override Enum GetCommandCase(string[] args)
@@ -83,13 +92,26 @@ public class UnStageCommand : Command,ICommand
 
     private void UnStageFile(string fileRelativePath)
     {
+        var activeBranchHeadCommitHash = _branchService.GetActiveBranch().CommitHash;
+        var headCommit = _commitService.GetCommitByHash(activeBranchHeadCommitHash);
+        var headIndexRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
         var record = _indexService.TryGetRecordByPath(fileRelativePath);
         //if file not staged
         if (record == null)
         {
             throw new Exception("file isn't staged");
         }
-        _indexService.DeleteRecord(fileRelativePath);
+        // if file added to index in previous commits
+        if (headIndexRecords.TryGetValue(record.RelativePath, out var headIndexRecord))
+        {
+            // change current index record to previous state
+            _indexService.DeleteRecord(record.RelativePath);
+            _indexService.AddRecord(headIndexRecord);
+        }
+        else
+        {
+            _indexService.DeleteRecord(fileRelativePath);
+        }
         _indexService.SaveChanges();
     }
 

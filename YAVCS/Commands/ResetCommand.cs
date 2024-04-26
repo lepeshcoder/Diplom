@@ -83,7 +83,6 @@ public class ResetCommand : Command,ICommand
                 {
                     _branchService.SetDetachedHead(activeBranch.CommitHash);
                 }
-
                 break;
             }
             case CommandCases.MixedReset:
@@ -101,15 +100,10 @@ public class ResetCommand : Command,ICommand
                 }
                 var activeBranch = _branchService.GetActiveBranch();
                 var activeBranchName = activeBranch.Name ;
+            
                 _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
-
-                var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(newHeadCommit.TreeHash);
-                _indexService.ClearIndex();
-                foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-                {
-                    _indexService.AddRecord(indexRecord);
-                }
-                _indexService.SaveChanges();
+                _indexService.ResetIndexToState(newHeadCommit.TreeHash);
+               
                 if (!_branchService.IsDetachedHead())
                 {
                     _branchService.SetDetachedHead(activeBranch.CommitHash);
@@ -135,43 +129,8 @@ public class ResetCommand : Command,ICommand
                 var activeBranchName = activeBranch.Name;
                 _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
 
-                // reset index
-                var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(newHeadCommit.TreeHash);
-                _indexService.ClearIndex();
-                foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-                {
-                    _indexService.AddRecord(indexRecord);
-                } 
-                _indexService.SaveChanges();
-                
-                //reset working tree
-                var allDirectories = Directory.GetDirectories(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-                var allFiles = Directory.GetFiles(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-
-                foreach (var file in allFiles)
-                {
-                    File.Delete(file);   
-                }
-
-                foreach (var directory in allDirectories)
-                {
-                    if(directory != vcsRootDirectoryNavigator.VcsRootDirectory)
-                        Directory.Delete(directory,true);
-                }
-
-                foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-                {
-                    var absolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory +
-                                       Path.DirectorySeparatorChar + indexRecord.RelativePath;
-                    
-                    var directoryName = Path.GetDirectoryName(absolutePath);
-                    if (directoryName != null)
-                    {
-                        Directory.CreateDirectory(directoryName);
-                    }
-                    using (var fs = File.Create(absolutePath)) {};
-                    File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
-                }
+                _indexService.ResetIndexToState(newHeadCommit.TreeHash);
+                _treeService.ResetWorkingDirectoryToState(newHeadCommit.TreeHash);
 
                 if (!_branchService.IsDetachedHead())
                 {

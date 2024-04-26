@@ -4,17 +4,17 @@ namespace YAVCS.Models;
 
 public class PatchModel
 {
+    public string BranchName; 
     public Dictionary<string, IndexRecord> FilesToAdd = [];
     public Dictionary<string, IndexRecord> FilesToDelete = [];
-    public List<IndexRecord> ModifiedFiles = [];
-    public List<MyersDiff<string>> Diffs = [];
+    public Dictionary<string, IndexRecord> ModifiedFiles = [];
 
     public PatchModel(Dictionary<string, IndexRecord> filesToAdd,Dictionary<string, IndexRecord> filesToDelete,
-        List<IndexRecord> modifiedFiles, List<MyersDiff<string>> diffs)
+        Dictionary<string, IndexRecord> modifiedFiles, string branchName)
     {
         FilesToAdd = filesToAdd;
         FilesToDelete = filesToDelete;
         ModifiedFiles = modifiedFiles;
-        Diffs = diffs;
+        BranchName = branchName;
     }
 }

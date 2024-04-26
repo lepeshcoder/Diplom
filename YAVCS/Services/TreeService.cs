@@ -11,12 +11,15 @@ public class TreeService : ITreeService
     private readonly INavigatorService _navigatorService;
     private readonly IIndexService _indexService;
     private readonly IHashService _hashService;
+    private readonly IBlobService _blobService;
 
-    public TreeService(INavigatorService navigatorService, IIndexService indexService, IHashService hashService)
+    public TreeService(INavigatorService navigatorService, IIndexService indexService,
+        IHashService hashService, IBlobService blobService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
         _hashService = hashService;
+        _blobService = blobService;
     }
     
     public string CreateTreeByIndex()
@@ -76,6 +79,40 @@ public class TreeService : ITreeService
     public void CreateTree(TreeFileModel tree)
     {
         WriteTree(tree);
+    }
+
+    public void ResetWorkingDirectoryToState(string treeHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        //reset working tree
+        var allDirectories = Directory.GetDirectories(vcsRootDirectoryNavigator!.RepositoryRootDirectory);
+        var allFiles = Directory.GetFiles(vcsRootDirectoryNavigator.RepositoryRootDirectory);
+
+        foreach (var file in allFiles)
+        {
+            File.Delete(file);   
+        }
+
+        foreach (var directory in allDirectories)
+        {
+            if(directory != vcsRootDirectoryNavigator.VcsRootDirectory)
+                Directory.Delete(directory,true);
+        }
+
+        var treeRecords = GetTreeRecordsByPath(treeHash);
+        foreach (var indexRecord in treeRecords.Values)
+        {
+            var absolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory +
+                               Path.DirectorySeparatorChar + indexRecord.RelativePath;
+                    
+            var directoryName = Path.GetDirectoryName(absolutePath);
+            if (directoryName != null)
+            {
+                Directory.CreateDirectory(directoryName);
+            }
+            using (var fs = File.Create(absolutePath)) {};
+            File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
+        }
     }
 
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")

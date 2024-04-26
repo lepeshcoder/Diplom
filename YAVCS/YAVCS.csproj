@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Diff3\Diff3.csproj" />
       <ProjectReference Include="C:\Users\nelep\OneDrive\Рабочий стол\kal2\Diffs\src\Diffs.csproj" />
     </ItemGroup>
 

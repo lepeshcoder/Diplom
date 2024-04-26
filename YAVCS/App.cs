@@ -50,7 +50,10 @@ public static class App
             {
                 "unstage",
                 new UnStageCommand(Services.GetRequiredService<INavigatorService>(),
-                    Services.GetRequiredService<IIndexService>())
+                    Services.GetRequiredService<IIndexService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<ICommitService>())
             },
             {
                 "commit",
@@ -112,7 +115,9 @@ public static class App
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<ICommitService>(),
                     Services.GetRequiredService<IMergeService>(),
-                    Services.GetRequiredService<IBlobService>())
+                    Services.GetRequiredService<IBlobService>(),
+                    Services.GetRequiredService<IHashService>(),
+                    Services.GetRequiredService<IIndexService>())
             }
             
         };

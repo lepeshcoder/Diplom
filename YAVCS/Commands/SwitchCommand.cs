@@ -94,43 +94,8 @@ public class SwitchCommand : Command,ICommand
                 
                 if (activeBranchCommitHash != branchToSwitch.CommitHash)
                 {
-                    // reset index
-                    var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(branchToSwitchHeadCommit!.TreeHash);
-                    _indexService.ClearIndex();
-                    foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-                    {
-                        _indexService.AddRecord(indexRecord);
-                    } 
-                    _indexService.SaveChanges();
-                
-                    //reset working tree
-                    var allDirectories = Directory.GetDirectories(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-                    var allFiles = Directory.GetFiles(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-
-                    foreach (var file in allFiles)
-                    {
-                        File.Delete(file);   
-                    }
-
-                    foreach (var directory in allDirectories)
-                    {
-                        if(directory != vcsRootDirectoryNavigator.VcsRootDirectory)
-                            Directory.Delete(directory,true);
-                    }
-
-                    foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-                    {
-                        var absolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory +
-                                           Path.DirectorySeparatorChar + indexRecord.RelativePath;
-                    
-                        var directoryName = Path.GetDirectoryName(absolutePath);
-                        if (directoryName != null)
-                        {
-                            Directory.CreateDirectory(directoryName);
-                        }
-                        using (var fs = File.Create(absolutePath)) {};
-                        File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
-                    }
+                    _indexService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
+                    _treeService.ResetWorkingDirectoryToState(branchToSwitchHeadCommit.TreeHash);
                 }
                 _branchService.SetActiveBranch(branchToSwitch);
                 break;
