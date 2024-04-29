@@ -102,7 +102,7 @@ public class ResetCommand : Command,ICommand
                 var activeBranchName = activeBranch.Name ;
             
                 _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
-                _indexService.ResetIndexToState(newHeadCommit.TreeHash);
+                _treeService.ResetIndexToState(newHeadCommit.TreeHash);
                
                 if (!_branchService.IsDetachedHead())
                 {
@@ -129,7 +129,7 @@ public class ResetCommand : Command,ICommand
                 var activeBranchName = activeBranch.Name;
                 _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
 
-                _indexService.ResetIndexToState(newHeadCommit.TreeHash);
+                _treeService.ResetIndexToState(newHeadCommit.TreeHash);
                 _treeService.ResetWorkingDirectoryToState(newHeadCommit.TreeHash);
 
                 if (!_branchService.IsDetachedHead())

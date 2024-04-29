@@ -94,7 +94,7 @@ public class SwitchCommand : Command,ICommand
                 
                 if (activeBranchCommitHash != branchToSwitch.CommitHash)
                 {
-                    _indexService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
+                    _treeService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
                     _treeService.ResetWorkingDirectoryToState(branchToSwitchHeadCommit.TreeHash);
                 }
                 _branchService.SetActiveBranch(branchToSwitch);

@@ -107,7 +107,7 @@ public class MergeCommand : Command,ICommand
                 {
                     Console.WriteLine("Fast forward merge");
                     _branchService.UpdateBranch(activeBranch.Name,branchToMergeHeadCommit.Hash);
-                    _indexService.ResetIndexToState(branchToMergeHeadCommit.TreeHash);
+                    _treeService.ResetIndexToState(branchToMergeHeadCommit.TreeHash);
                     _treeService.ResetWorkingDirectoryToState(branchToMergeHeadCommit.TreeHash);
                     return;
                 }
@@ -127,40 +127,15 @@ public class MergeCommand : Command,ICommand
                 if (mergeResult.ConflictPaths.Count == 0)
                 {
                     var mergeCommitRootTreeHash = _treeService.CreateTreeByRecords(mergeResult.IndexRecords);
-                    var mergeCommit = _commitService.CreateCommit(mergeCommitRootTreeHash,
+                    var mergeCommit = _commitService.CreateCommit(
+                        mergeCommitRootTreeHash,
                         DateTime.Now,
                         $"merge {branchToMerge.Name} into {activeBranch.Name}",
                         [activeBranchHeadCommit.Hash, branchToMergeHeadCommit.Hash]);
+                    
                     _branchService.UpdateBranch(activeBranch.Name,mergeCommit.Hash);
-                    
-                    //reset working tree
-                    var allDirectories = Directory.GetDirectories(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-                    var allFiles = Directory.GetFiles(vcsRootDirectoryNavigator.RepositoryRootDirectory);
-
-                    foreach (var file in allFiles)
-                    {
-                        File.Delete(file);   
-                    }
-
-                    foreach (var directory in allDirectories)
-                    {
-                        if(directory != vcsRootDirectoryNavigator.VcsRootDirectory)
-                            Directory.Delete(directory,true);
-                    }
-
-                    foreach (var indexRecord in _treeService.GetTreeRecordsByPath(mergeCommitRootTreeHash).Values)
-                    {
-                        var absolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory +
-                                           Path.DirectorySeparatorChar + indexRecord.RelativePath;
-                    
-                        var directoryName = Path.GetDirectoryName(absolutePath);
-                        if (directoryName != null)
-                        {
-                            Directory.CreateDirectory(directoryName);
-                        }
-                        using (var fs = File.Create(absolutePath)) {};
-                        File.WriteAllBytes(absolutePath,_blobService.GetBlobData(indexRecord.BlobHash));
-                    }
+                    _treeService.ResetIndexToState(mergeCommitRootTreeHash);
+                    _treeService.ResetWorkingDirectoryToState(mergeCommitRootTreeHash);
                 }
                 else
                 {
@@ -189,14 +164,13 @@ public class MergeCommand : Command,ICommand
             .Where(pair => !modifiedCommitIndexRecords.ContainsKey(pair.Key))
             .ToDictionary(pair => pair.Key, pair => pair.Value);
         
-        //todo: readlly modified add hash 
         var modifiedFiles = modifiedCommitIndexRecords
-            .Where(pair => baseCommitIndexRecords.ContainsKey(pair.Key))
+            .Where(pair => baseCommitIndexRecords.ContainsKey(pair.Key) &&
+                           pair.Value.BlobHash != modifiedCommitIndexRecords[pair.Key].BlobHash)
             .ToDictionary(pair => pair.Key, pair => pair.Value);
         
         
         return new PatchModel(newFiles, deletedFiles, modifiedFiles,modifiedBranchName);
-
     }
 
     private MergeResultModel ApplyPatches3Way(CommitFileModel baseCommit, PatchModel firstBranchPatch, PatchModel secondBranchPatch)

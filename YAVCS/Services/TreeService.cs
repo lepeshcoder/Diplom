@@ -20,6 +20,7 @@ public class TreeService : ITreeService
         _indexService = indexService;
         _hashService = hashService;
         _blobService = blobService;
+       
     }
     
     public string CreateTreeByIndex()
@@ -115,6 +116,18 @@ public class TreeService : ITreeService
         }
     }
 
+    public void ResetIndexToState(string treeHash)
+    {
+        // reset index
+        var newHeadCommitIndexRecords = GetTreeRecordsByPath(treeHash);
+        _indexService.ClearIndex();
+        foreach (var indexRecord in newHeadCommitIndexRecords.Values)
+        {
+            _indexService.AddRecord(indexRecord);
+        } 
+        _indexService.SaveChanges();
+    }
+
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")
     {
         var temp = "";
@@ -123,7 +136,7 @@ public class TreeService : ITreeService
         {
             if (childItem.Type == (int)ChildItemModel.Types.Blob)
             {
-                temp += childItem.Hash;
+                temp += childItem.Hash + childItem.Name;
             }
             else
             {

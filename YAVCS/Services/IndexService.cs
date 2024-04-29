@@ -9,16 +9,14 @@ public class IndexService : IIndexService
     
     //services
     private readonly INavigatorService _navigatorService;
-    private readonly ITreeService _treeService;
 
     // Dictionary of index records by path
     private Dictionary<string, IndexRecord> _recordsByPath = new();
     
-    public IndexService(INavigatorService navigatorService, ITreeService treeService)
+    public IndexService(INavigatorService navigatorService)
     {
         // fill dictionary with data in index file
         _navigatorService = navigatorService;
-        _treeService = treeService;
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         if (vcsRootDirectoryNavigator == null) return;
         var records = File.ReadAllLines(vcsRootDirectoryNavigator.IndexFile);
@@ -77,15 +75,4 @@ public class IndexService : IIndexService
         SaveChanges();
     }
 
-    public void ResetIndexToState(string treeHash)
-    {
-        // reset index
-        var newHeadCommitIndexRecords = _treeService.GetTreeRecordsByPath(treeHash);
-        ClearIndex();
-        foreach (var indexRecord in newHeadCommitIndexRecords.Values)
-        {
-            AddRecord(indexRecord);
-        } 
-        SaveChanges();
-    }
 }

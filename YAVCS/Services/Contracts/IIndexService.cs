@@ -12,6 +12,4 @@ public interface IIndexService
     Dictionary<string,IndexRecord> GetRecords();
     bool IsIndexEmpty();
     void ClearIndex();
-    void ResetIndexToState(string treeHash);
-
 }

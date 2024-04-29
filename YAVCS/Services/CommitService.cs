@@ -10,13 +10,16 @@ public class CommitService : ICommitService
     private readonly IHashService _hashService;
     private readonly IBranchService _branchService;
     private readonly ITreeService _treeService;
+    private readonly IIndexService _indexService;
 
-    public CommitService(INavigatorService navigatorService, IHashService hashService, IBranchService branchService, ITreeService treeService)
+    public CommitService(INavigatorService navigatorService, IHashService hashService, IBranchService branchService,
+        ITreeService treeService, IIndexService indexService)
     {
         _navigatorService = navigatorService;
         _hashService = hashService;
         _branchService = branchService;
         _treeService = treeService;
+        _indexService = indexService;
     }
 
     public CommitFileModel CreateCommit(string treeHash, DateTime createdAt, string message,List<string> parentCommitHash)
@@ -42,8 +45,13 @@ public class CommitService : ICommitService
         var headCommit = GetCommitByHash(activeBranch.CommitHash);
         return _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
     }
-    
-    
-    
-    
+
+    public bool IsIndexSameFromHead()
+    {
+        var activeBranch = _branchService.GetActiveBranch();
+        var headCommit = GetCommitByHash(activeBranch.CommitHash);
+        var currentRecords = _indexService.GetRecords().Values.ToHashSet();
+        var headRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash).Values.ToHashSet();
+        return currentRecords.SetEquals(headRecords);
+    }
 }

@@ -66,9 +66,9 @@ public class CommitCommand : Command, ICommand
             }
             case CommandCases.DefaultCase:
             {
-                if (_indexService.IsIndexEmpty())
+                if (_commitService.IsIndexSameFromHead())
                 {
-                    throw new EmptyIndexException("Commit.Execute");
+                    throw new EmptyIndexException("There is nothing to commit");
                 }
                 var activeBranch = _branchService.GetActiveBranch();
                 var rootTreeHash = _treeService.CreateTreeByIndex();

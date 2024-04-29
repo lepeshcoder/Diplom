@@ -93,8 +93,11 @@ public class DiffCommand : Command,ICommand
 
                 // Элементы, которые есть в обеих коллекциях
                 var modifiedFiles = headCommitIndexRecords
-                    .Where(pair => commitToCompareIndexRecords.ContainsKey(pair.Key))
+                    .Where(
+                        pair => commitToCompareIndexRecords.ContainsKey(pair.Key) && 
+                                pair.Value.BlobHash != commitToCompareIndexRecords[pair.Key].BlobHash)
                     .ToDictionary(pair => pair.Key, pair => pair.Value);
+                
 
                 foreach (var newFile in newFiles.Values)
                 {
@@ -115,7 +118,14 @@ public class DiffCommand : Command,ICommand
                     var commitToCompareFileText = Encoding.UTF8.GetString(commitToCompareFileBytes)
                         .Split([Environment.NewLine], StringSplitOptions.None);
                     var metaData = $"\n{relativePath}:\n";
-                    Console.WriteLine($"{metaData}\n{GetDiff(currentCommitFileText, commitToCompareFileText)}\n");
+                    Console.WriteLine(metaData+"\n");
+                    var diffResult = GetDiff(commitToCompareFileText, currentCommitFileText);
+                    for (var i = 0; i < diffResult.Lines.Count; i++)
+                    {
+                        Console.ForegroundColor = diffResult.LineColors[i];
+                        Console.WriteLine(diffResult.Lines[i]);
+                    }
+                    Console.WriteLine("\n\n");
                 }
                 
                 break;
@@ -123,31 +133,37 @@ public class DiffCommand : Command,ICommand
         }
     }
 
-    private string GetDiff(string[] previousVersion,string[] currentVersion)
+    private DiffResultModel GetDiff(string[] previousVersion,string[] currentVersion)
     {
-        var diff = "";
-        var myersDiff = new MyersDiff<string>(previousVersion, currentVersion);
+        var result = new DiffResultModel([], []);
+        var myersDiff = new MyersDiff<string>(previousVersion,currentVersion);
+        var contextLinesNumber = 2;
         foreach (var part in myersDiff.GetEditScript())
         {
-            var linesBeforeDifference = part.LineA >= 2 
-                ? currentVersion.Skip(part.LineB - 2).Take(2).ToArray()
-                : [];
+            var linesBeforeDifference = (part.LineA >= contextLinesNumber 
+                ? previousVersion.Skip(part.LineA - contextLinesNumber).Take(contextLinesNumber)
+                : previousVersion.Take(part.LineA)).ToList();
+            
+            var linesToDelete = previousVersion.Skip(part.LineA).Take(part.CountA).Select(line => "- " + line).ToList();
+            var linesToAdd = currentVersion.Skip(part.LineB).Take(part.CountB).Select(line => "+ " + line).ToList();
 
-            var linesToDelete = previousVersion.Skip(part.LineA).Take(part.CountA).Select(line => "- " + line).ToArray();
-            var linesToAdd = currentVersion.Skip(part.LineB).Take(part.CountB).Select(line => "+ " + line).ToArray();
+            var linesAfterDifference = (part.LineA < previousVersion.Length - 2
+                ? previousVersion.Skip(part.LineA + 1).Take(2).ToArray()
+                : previousVersion.Take(new Range(part.LineA + 1,previousVersion.Length - 1))).ToList();
 
-            var linesAfterDifference = part.LineB < currentVersion.Length - 2
-                ? currentVersion.Skip(part.LineB + part.CountB).Take(2).ToArray()
-                : [];
-
-
-            diff += string.Join("\n", linesBeforeDifference
-                .Concat(linesToDelete)
-                .Concat(linesToAdd)
-                .Concat(linesAfterDifference)
-                .ToArray()) + "\n\n";
+            
+            result.Lines.AddRange(linesBeforeDifference);
+            result.LineColors.AddRange(Enumerable.Repeat(ConsoleColor.White,linesBeforeDifference.Count));
+            result.Lines.AddRange(linesToDelete);
+            result.LineColors.AddRange(Enumerable.Repeat(ConsoleColor.Red,linesToDelete.Count));
+            result.Lines.AddRange(linesToAdd);
+            result.LineColors.AddRange(Enumerable.Repeat(ConsoleColor.Green,linesToAdd.Count));
+            result.Lines.AddRange(linesAfterDifference);
+            result.LineColors.AddRange(Enumerable.Repeat(ConsoleColor.White,linesAfterDifference.Count));
+            result.Lines.Add("\n\n\n\n");
+            result.LineColors.Add(ConsoleColor.White);
         }
-        return diff;
+        return result;
     }
 
     

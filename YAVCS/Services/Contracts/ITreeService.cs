@@ -16,4 +16,6 @@ public interface ITreeService
    void CreateTree(TreeFileModel tree);
    
    void ResetWorkingDirectoryToState(string treeHash);
+   void ResetIndexToState(string treeHash);
+
 }

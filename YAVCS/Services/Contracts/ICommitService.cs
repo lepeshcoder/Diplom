@@ -9,4 +9,7 @@ public interface ICommitService
     CommitFileModel? GetCommitByHash(string commitHash);
 
     Dictionary<string,IndexRecord> GetHeadRecordsByPath();
+
+    bool IsIndexSameFromHead();
+    
 }

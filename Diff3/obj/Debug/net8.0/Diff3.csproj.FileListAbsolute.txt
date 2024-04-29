@@ -1,0 +1,12 @@
+D:\diplom\YAVCS\Diff3\bin\Debug\net8.0\Diff3.deps.json
+D:\diplom\YAVCS\Diff3\bin\Debug\net8.0\Diff3.dll
+D:\diplom\YAVCS\Diff3\bin\Debug\net8.0\Diff3.pdb
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.GeneratedMSBuildEditorConfig.editorconfig
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.AssemblyInfoInputs.cache
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.AssemblyInfo.cs
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.csproj.CoreCompileInputs.cache
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.sourcelink.json
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.dll
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\refint\Diff3.dll
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\Diff3.pdb
+D:\diplom\YAVCS\Diff3\obj\Debug\net8.0\ref\Diff3.dll

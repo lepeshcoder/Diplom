@@ -316,8 +316,6 @@ namespace Verano.Diff3Way
         {
             listToAdd.Add("<<<<<<< " + aName);
             if (chunk.ASeq != null && chunk.ASeq.Any(x => x != null)) listToAdd.AddRange(chunk.ASeq.Where(c => c != null));
-            listToAdd.Add("||||||| " + oName);
-            listToAdd.AddRange(chunk.OSeq.Where(c => c != null));
             listToAdd.Add("=======");
             if (chunk.BSeq != null && chunk.BSeq.Any(x => x != null)) listToAdd.AddRange(chunk.BSeq.Where(c => c != null));
             listToAdd.Add(">>>>>>> " + bName);
