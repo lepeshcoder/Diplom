@@ -70,13 +70,22 @@ public class CommitCommand : Command, ICommand
                 {
                     throw new EmptyIndexException("There is nothing to commit");
                 }
-                var activeBranch = _branchService.GetActiveBranch();
+                var headCommitHash = _branchService.GetHeadCommitHash();
                 var rootTreeHash = _treeService.CreateTreeByIndex();
                 var commitMessage = args.Aggregate("", (current, arg) => current + arg + " ");
-                var parentCommitHash = activeBranch.CommitHash;
+                var parentCommitHash = headCommitHash;
                 var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,[parentCommitHash]);
-                
-                _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
+
+                if (_branchService.IsDetachedHead())
+                {
+                    _branchService.SetHead(newCommit.Hash);
+                }
+                else
+                {
+                    var activeBranch = _branchService.GetActiveBranch();
+                    _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
+                }
+               
                 _garbageCollectorService.CollectGarbage();
                  break; 
             }

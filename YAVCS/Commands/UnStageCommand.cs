@@ -108,8 +108,8 @@ public class UnStageCommand : Command,ICommand
 
     private void UnStageFile(string fileRelativePath,bool isForce = false)
     {
-        var activeBranchHeadCommitHash = _branchService.GetActiveBranch().CommitHash;
-        var headCommit = _commitService.GetCommitByHash(activeBranchHeadCommitHash);
+        var headCommitHash = _branchService.GetHeadCommitHash();
+        var headCommit = _commitService.GetCommitByHash(headCommitHash);
         var headIndexRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
         var record = _indexService.TryGetRecordByPath(fileRelativePath);
         //if file not staged

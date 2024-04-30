@@ -46,7 +46,9 @@ public static class FileSystemConstants
     // log file
     public const string LogFile = "log";
     // detachedHead file
-    public const string DetachedHeadFile = "origHead";
+    public const string OrigHeadFile = "origHead";
     // mergeConflict file
     public const string MergeConflictFile = "mergeConflict";
+    // previous branch Name File
+    public const string PreviousBranchFile = "previousBranch";
 }

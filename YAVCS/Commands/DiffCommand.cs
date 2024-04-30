@@ -75,10 +75,10 @@ public class DiffCommand : Command,ICommand
                     throw new ArgumentException("no commit with this hash");
                 }
 
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchHeadCommit = _commitService.GetCommitByHash(activeBranch.CommitHash);
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                var headCommit = _commitService.GetCommitByHash(headCommitHash);
                 
-                var headCommitIndexRecords = _treeService.GetTreeRecordsByPath(activeBranchHeadCommit!.TreeHash);
+                var headCommitIndexRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
                 var commitToCompareIndexRecords = _treeService.GetTreeRecordsByPath(commitToCompare.TreeHash);
                 
                 // Элементы, которые есть только в первой коллекции

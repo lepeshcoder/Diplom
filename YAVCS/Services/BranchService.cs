@@ -68,29 +68,48 @@ public class BranchService : IBranchService
             File.Delete(branchFilePath);
         }
     }
-
-    public void SetDetachedHead(string hashCommit)
+    
+    public void SetOrigHead(string hashCommit)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        File.WriteAllText(vcsRootDirectoryNavigator!.DetachedHeadFile,hashCommit);
+        File.WriteAllText(vcsRootDirectoryNavigator!.OrigHeadFile,hashCommit);
     }
 
-    public string GetDetachedHeadCommitHash()
+    public string GetOrigHeadCommitHash()
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        return File.ReadAllText(vcsRootDirectoryNavigator!.DetachedHeadFile);
+        return File.ReadAllText(vcsRootDirectoryNavigator!.OrigHeadFile);
     }
 
     public bool IsDetachedHead()
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        return File.ReadAllText(vcsRootDirectoryNavigator!.DetachedHeadFile).Length != 0;
+        return File.ReadAllText(vcsRootDirectoryNavigator!.OrigHeadFile).Length != 0;
     }
 
     public string GetHeadCommitHash()
     {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         return IsDetachedHead() 
-            ? GetDetachedHeadCommitHash() 
+            ? File.ReadAllText(vcsRootDirectoryNavigator!.HeadFile)
             : GetActiveBranch().CommitHash;
+    }
+
+    public void SetPreviousBranch(string branchName)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        File.WriteAllText(vcsRootDirectoryNavigator!.PreviousBranchFile,branchName);
+    }
+
+    public string GetPreviousBranchName()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        return File.ReadAllText(vcsRootDirectoryNavigator!.PreviousBranchFile);
+    }
+
+    public void SetHead(string commitHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        File.WriteAllText(vcsRootDirectoryNavigator!.HeadFile,commitHash);
     }
 }

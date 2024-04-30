@@ -18,10 +18,15 @@ public interface IBranchService
 
     void DeleteBranch(string name);
 
-    void SetDetachedHead(string hashCommit);
+    void SetOrigHead(string hashCommit);
 
-    string GetDetachedHeadCommitHash();
+    string GetOrigHeadCommitHash();
 
     bool IsDetachedHead();
     string GetHeadCommitHash();
+
+    void SetPreviousBranch(string branchName);
+    string GetPreviousBranchName();
+
+    void SetHead(string commitHash);
 }

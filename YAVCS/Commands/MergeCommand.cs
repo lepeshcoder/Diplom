@@ -73,6 +73,11 @@ public class MergeCommand : Command,ICommand
                     throw new RepositoryNotFoundException("not a part of repository");
                 }
 
+                if (_branchService.IsDetachedHead())
+                {
+                    throw new ArgumentException("Cannot merge in detached head state");
+                }
+                
                 var branchToMergeName = args[0];
                 var branchToMerge = _branchService.GetBranchByName(branchToMergeName);
                 if (branchToMerge == null)

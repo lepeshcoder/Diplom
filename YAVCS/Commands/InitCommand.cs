@@ -100,7 +100,7 @@ public class InitCommand : Command,ICommand
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
-        using (var fs = File.Create(vcsRootDirectoryNavigator.DetachedHeadFile )) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.OrigHeadFile )) {};
 
         // create zeroCommit
         var zeroCommitTree = new TreeFileModel("zeroCommitTree", new Dictionary<string, ChildItemModel>(),

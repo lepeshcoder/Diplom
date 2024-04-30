@@ -62,13 +62,19 @@ public class StatusCommand : Command,ICommand
                 {
                     throw new RepositoryNotFoundException("StatusCommand.Execute");
                 }
-
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name;
                 
                 GetStatusInfo();
 
-                Console.WriteLine($"On branch {activeBranchName}\n");
+                if (_branchService.IsDetachedHead())
+                {
+                    var headCommitHash = _branchService.GetHeadCommitHash();
+                    Console.WriteLine($"Detached head set to {headCommitHash}");
+                }
+                else
+                {
+                    var activeBranch = _branchService.GetActiveBranch();
+                    Console.WriteLine($"On branch {activeBranch.Name}\n");
+                }
                 
                 Console.WriteLine("Staged Items:");
                 foreach (var item in _stagedItems) Console.WriteLine(item);

@@ -25,7 +25,8 @@ public class LogCommand : Command,ICommand
     {
         HelpCase,
         DefaultCase,
-        SyntaxError
+        SyntaxError,
+        GraphCase
     }
     
     protected override Enum GetCommandCase(string[] args)
@@ -33,6 +34,7 @@ public class LogCommand : Command,ICommand
         return args switch
         {
             ["--help"] => CommandCases.HelpCase,
+            ["--graph"] => CommandCases.GraphCase,
             _ when args.Length == 0 => CommandCases.DefaultCase,
             _ => CommandCases.SyntaxError
         };
@@ -61,24 +63,53 @@ public class LogCommand : Command,ICommand
                 {
                     throw new RepositoryNotFoundException("Log.Execute");
                 }
-                var activeBranch = _branchService.GetActiveBranch();
-                var currentCommit = _commitService.GetCommitByHash(activeBranch.CommitHash);
-                if (currentCommit == null)
-                {
-                    Console.WriteLine("Repository doesn't have any commits");
-                }
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                var headCommit = _commitService.GetCommitByHash(headCommitHash);
                 
                 var allBranches = _branchService.GetAllBranches();
-                while (currentCommit != null)
+                while (headCommit != null)
                 {
-                    ShowCommitInfo(currentCommit,allBranches);
+                    ShowCommitInfo(headCommit,allBranches);
                     //TODO: СДЕЛАТЬ ЧТО ТО С ЛОГОМ
                     // check for zero commit
-                    if (currentCommit.ParentCommitHashes.Count == 0) return;
-                    var parentCommit = _commitService.GetCommitByHash(currentCommit.ParentCommitHashes[0]);
+                    if (headCommit.ParentCommitHashes.Count == 0) return;
+                    var parentCommit = _commitService.GetCommitByHash(headCommit.ParentCommitHashes[0]);
                     if (parentCommit == null) break;
-                    currentCommit = parentCommit;
+                    headCommit = parentCommit;
                 } 
+                break;
+            }
+            case CommandCases.GraphCase:
+            {
+                var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+                if (vcsRootDirectoryNavigator == null)
+                {
+                    throw new RepositoryNotFoundException("Log.Execute");
+                }
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                var headCommit = _commitService.GetCommitByHash(headCommitHash);
+                
+                var allBranches = _branchService.GetAllBranches();
+
+                var ancestors = new Queue<string>([headCommit!.Hash]);
+                var commitHashesList = new List<string>();
+                while (ancestors.Count != 0)
+                {
+                    var ancestorCommit = _commitService.GetCommitByHash(ancestors.Dequeue());
+                    commitHashesList.Add(ancestorCommit!.Hash);
+                    foreach (var ancestorCommitParentHash in ancestorCommit!.ParentCommitHashes)
+                    {
+                        ancestors.Enqueue(ancestorCommitParentHash);
+                    }
+                }
+
+                var sortedCommitHashesList = commitHashesList.ToHashSet().OrderByDescending(hash=> _commitService.GetCommitByHash(hash)!.CreatedAt).ToList();
+                foreach (var commitHash in sortedCommitHashesList)
+                {
+                    var commit = _commitService.GetCommitByHash(commitHash);
+                    ShowCommitInfo(commit!,allBranches);
+                }
+
                 break;
             }
         }

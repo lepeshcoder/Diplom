@@ -74,30 +74,50 @@ public class SwitchCommand : Command,ICommand
                     throw new ArgumentException($"Branch {branchToSwitchName} doesn't exist");
                 }
 
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name;
-                if (activeBranchName == branchToSwitchName)
-                {
-                    throw new ArgumentException($"Already on branch {activeBranchName}");
-                }
-
-                var activeBranchCommitHash = activeBranch.CommitHash;
-                
                 if (_branchService.IsDetachedHead())
                 {
-                    var origHead = _branchService.GetDetachedHeadCommitHash();
-                    _branchService.UpdateBranch(activeBranchName,origHead);
-                    _branchService.SetDetachedHead("");
+                    var previousActiveBranchName = _branchService.GetPreviousBranchName();
+                    var previousActiveBranch = _branchService.GetBranchByName(previousActiveBranchName);
+                    var origHeadCommitHash = _branchService.GetOrigHeadCommitHash();
+
+                    if (branchToSwitch.Name == previousActiveBranchName)
+                    {
+                        var origHeadCommit = _commitService.GetCommitByHash(origHeadCommitHash);
+                        _treeService.ResetIndexToState(origHeadCommit!.TreeHash);
+                        _treeService.ResetWorkingDirectoryToState(origHeadCommit.TreeHash);
+                        _branchService.SetActiveBranch(previousActiveBranch!);
+                    }
+                    else
+                    {
+                        var branchToSwitchHeadCommit = _commitService.GetCommitByHash(branchToSwitch.CommitHash);
+                        _treeService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
+                        _treeService.ResetWorkingDirectoryToState(branchToSwitchHeadCommit.TreeHash);
+                        _branchService.SetActiveBranch(branchToSwitch);
+                    }
+                    _branchService.UpdateBranch(previousActiveBranchName,origHeadCommitHash);
+                    _branchService.SetOrigHead("");
+                    _branchService.SetPreviousBranch("");
                 }
-                
-                var branchToSwitchHeadCommit = _commitService.GetCommitByHash(branchToSwitch.CommitHash);
-                
-                if (activeBranchCommitHash != branchToSwitch.CommitHash)
+                else
                 {
-                    _treeService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
-                    _treeService.ResetWorkingDirectoryToState(branchToSwitchHeadCommit.TreeHash);
+                    var activeBranch = _branchService.GetActiveBranch();
+                    var activeBranchName = activeBranch.Name;
+                    if (activeBranchName == branchToSwitchName)
+                    {
+                        throw new ArgumentException($"Already on branch {activeBranchName}");
+                    }
+
+                    var activeBranchCommitHash = activeBranch.CommitHash;
+                    var branchToSwitchHeadCommit = _commitService.GetCommitByHash(branchToSwitch.CommitHash);
+                
+                    if (activeBranchCommitHash != branchToSwitch.CommitHash)
+                    {
+                        _treeService.ResetIndexToState(branchToSwitchHeadCommit!.TreeHash);
+                        _treeService.ResetWorkingDirectoryToState(branchToSwitchHeadCommit.TreeHash);
+                    }
+                    _branchService.SetActiveBranch(branchToSwitch);
                 }
-                _branchService.SetActiveBranch(branchToSwitch);
+              
                 break;
             }
         }

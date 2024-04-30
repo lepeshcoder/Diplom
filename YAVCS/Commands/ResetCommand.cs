@@ -75,13 +75,17 @@ public class ResetCommand : Command,ICommand
                 {
                     throw new CommitNotFoundException(commitHash);
                 }
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name;
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
-                // set detached head
+                // set orig head
                 if (!_branchService.IsDetachedHead())
                 {
-                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                    var activeBranch = _branchService.GetActiveBranch();
+                    _branchService.SetOrigHead(activeBranch.CommitHash);
+                    _branchService.SetPreviousBranch(activeBranch.Name);
+                    _branchService.SetHead(newHeadCommit.Hash);
+                }
+                else
+                {
+                    _branchService.SetHead(newHeadCommit.Hash);
                 }
                 break;
             }
@@ -98,17 +102,20 @@ public class ResetCommand : Command,ICommand
                 {
                     throw new CommitNotFoundException(commitHash);
                 }
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name ;
-            
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
+                
                 _treeService.ResetIndexToState(newHeadCommit.TreeHash);
                
                 if (!_branchService.IsDetachedHead())
                 {
-                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                    var activeBranch = _branchService.GetActiveBranch();
+                    _branchService.SetOrigHead(activeBranch.CommitHash);
+                    _branchService.SetPreviousBranch(activeBranch.Name);
+                    _branchService.SetHead(newHeadCommit.Hash);
                 }
-
+                else
+                {
+                    _branchService.SetHead(newHeadCommit.Hash);
+                }
                 break;
             }
             case CommandCases.HardReset:
@@ -124,19 +131,21 @@ public class ResetCommand : Command,ICommand
                 {
                     throw new CommitNotFoundException(commitHash);
                 }
-                // update branch
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name;
-                _branchService.UpdateBranch(activeBranchName,newHeadCommit.Hash);
-
+                
                 _treeService.ResetIndexToState(newHeadCommit.TreeHash);
                 _treeService.ResetWorkingDirectoryToState(newHeadCommit.TreeHash);
 
                 if (!_branchService.IsDetachedHead())
                 {
-                    _branchService.SetDetachedHead(activeBranch.CommitHash);
+                    var activeBranch = _branchService.GetActiveBranch();
+                    _branchService.SetOrigHead(activeBranch.CommitHash);
+                    _branchService.SetPreviousBranch(activeBranch.Name);
+                    _branchService.SetHead(newHeadCommit.Hash);
                 }
-
+                else
+                {
+                    _branchService.SetHead(newHeadCommit.Hash);
+                }
                 break;
             }
         }

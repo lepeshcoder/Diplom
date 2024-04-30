@@ -81,9 +81,8 @@ public class BranchCommand : Command,ICommand
                 {
                     Console.WriteLine($"Branch {newBranchName} already exist");
                 }
-                var activeBranch = _branchService.GetActiveBranch();
-                var commitHash = activeBranch.CommitHash;
-                _branchService.CreateBranch(new BranchFileModel(newBranchName,commitHash));
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                _branchService.CreateBranch(new BranchFileModel(newBranchName,headCommitHash));
                 break;
             }
             case CommandCases.DeleteBranch:
@@ -95,24 +94,40 @@ public class BranchCommand : Command,ICommand
                 }
                 var branchToDeleteName = args[1];
                 var branchToDelete = _branchService.GetBranchByName(branchToDeleteName);
-                var activeBranch = _branchService.GetActiveBranch();
-                var activeBranchName = activeBranch.Name;
+                
                 if (branchToDelete == null)
                 {
                     throw new ArgumentException($"Branch {branchToDeleteName} doesn't exist");
                 }
-
-                if (activeBranchName == branchToDeleteName)
-                {
-                    throw new ArgumentException("Cannot delete active Branch");
-                }
                 
-                if (branchToDeleteName == "Master")
+                if (_branchService.IsDetachedHead())
                 {
-                    throw new ArgumentException("Can't Delete Branch Master");
+                    var previousActiveBranchName = _branchService.GetPreviousBranchName();
+                    if (branchToDeleteName == previousActiveBranchName)
+                    {
+                        throw new ArgumentException("Cannot delete previous active branch in detached head state");
+                    }
+                    if (branchToDeleteName == "Master")
+                    {
+                        throw new ArgumentException("Can't Delete Branch Master");
+                    }
+                    _branchService.DeleteBranch(branchToDeleteName);
                 }
-                
-                _branchService.DeleteBranch(branchToDeleteName);
+                else
+                {
+                    var activeBranch = _branchService.GetActiveBranch();
+                    var activeBranchName = activeBranch.Name;
+                    
+                    if (activeBranchName == branchToDeleteName)
+                    {
+                        throw new ArgumentException("Cannot delete active Branch");
+                    }
+                    if (branchToDeleteName == "Master")
+                    {
+                        throw new ArgumentException("Can't Delete Branch Master");
+                    }
+                    _branchService.DeleteBranch(branchToDeleteName);
+                }
                 break;
             }
         }

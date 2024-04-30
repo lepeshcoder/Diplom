@@ -41,15 +41,15 @@ public class CommitService : ICommitService
 
     public Dictionary<string,IndexRecord> GetHeadRecordsByPath()
     {
-        var activeBranch = _branchService.GetActiveBranch();
-        var headCommit = GetCommitByHash(activeBranch.CommitHash);
+        var headCommitHash = _branchService.GetHeadCommitHash();
+        var headCommit = GetCommitByHash(headCommitHash);
         return _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
     }
 
     public bool IsIndexSameFromHead()
     {
-        var activeBranch = _branchService.GetActiveBranch();
-        var headCommit = GetCommitByHash(activeBranch.CommitHash);
+        var headCommitHash = _branchService.GetHeadCommitHash();
+        var headCommit = GetCommitByHash(headCommitHash);
         var currentRecords = _indexService.GetRecords().Values.ToHashSet();
         var headRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash).Values.ToHashSet();
         return currentRecords.SetEquals(headRecords);
