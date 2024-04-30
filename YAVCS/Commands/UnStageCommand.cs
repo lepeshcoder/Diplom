@@ -38,6 +38,7 @@ public class UnStageCommand : Command,ICommand
         return args switch
         {
             ["--help"]  => CommandCases.HelpCase,
+            ["--force", ..] => CommandCases.ForceCase, 
             ["--all"] or ["--a"] => CommandCases.UnStageAll,
             _ when args.Length == 1 => CommandCases.DefaultCase,
             _ => CommandCases.SyntaxError
@@ -66,6 +67,21 @@ public class UnStageCommand : Command,ICommand
                 Console.WriteLine("Args syntax error");
                 break;
             }
+            case CommandCases.ForceCase:
+            {
+                var itemRelativePath = args[1];
+                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + '\\' + itemRelativePath;
+                if (File.Exists(itemAbsolutePath))
+                {
+                    UnStageFile(itemRelativePath,true);
+                }
+                else if (Directory.Exists(itemAbsolutePath))
+                {
+                    UnStageDirectory(itemAbsolutePath,true);
+                }
+                else Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                break;
+            }
             case CommandCases.DefaultCase:
             {
                 var itemRelativePath = args[0];
@@ -90,7 +106,7 @@ public class UnStageCommand : Command,ICommand
         }
     }
 
-    private void UnStageFile(string fileRelativePath)
+    private void UnStageFile(string fileRelativePath,bool isForce = false)
     {
         var activeBranchHeadCommitHash = _branchService.GetActiveBranch().CommitHash;
         var headCommit = _commitService.GetCommitByHash(activeBranchHeadCommitHash);
@@ -101,21 +117,29 @@ public class UnStageCommand : Command,ICommand
         {
             throw new Exception("file isn't staged");
         }
-        // if file added to index in previous commits
-        if (headIndexRecords.TryGetValue(record.RelativePath, out var headIndexRecord))
+
+        if (isForce)
         {
-            // change current index record to previous state
             _indexService.DeleteRecord(record.RelativePath);
-            _indexService.AddRecord(headIndexRecord);
         }
         else
         {
-            _indexService.DeleteRecord(fileRelativePath);
+            // if file added to index in previous commits
+            if (headIndexRecords.TryGetValue(record.RelativePath, out var headIndexRecord))
+            {
+                // change current index record to previous state
+                _indexService.DeleteRecord(record.RelativePath);
+                _indexService.AddRecord(headIndexRecord);
+            }
+            else
+            {
+                _indexService.DeleteRecord(fileRelativePath);
+            }
         }
         _indexService.SaveChanges();
     }
 
-    private void UnStageDirectory(string dirAbsolutePath)
+    private void UnStageDirectory(string dirAbsolutePath,bool isForce = false)
     {
         var repositoryRootDirectory = _navigatorService.TryGetRepositoryRootDirectory()!.RepositoryRootDirectory;
         foreach (var entry in  Directory.GetFileSystemEntries(dirAbsolutePath))
@@ -125,7 +149,7 @@ public class UnStageCommand : Command,ICommand
                 var fileRelativePath = Path.GetRelativePath(repositoryRootDirectory, entry);
                 try
                 { 
-                    UnStageFile(fileRelativePath);
+                    UnStageFile(fileRelativePath,isForce);
                 }
                 catch (Exception e)
                 {
@@ -134,7 +158,7 @@ public class UnStageCommand : Command,ICommand
             }
             else if (Directory.Exists(entry))
             {
-                UnStageDirectory(entry);
+                UnStageDirectory(entry,isForce);
             }
             else throw new Exception("Unknown fileSystem entry");
         }

@@ -23,4 +23,5 @@ public interface IBranchService
     string GetDetachedHeadCommitHash();
 
     bool IsDetachedHead();
+    string GetHeadCommitHash();
 }

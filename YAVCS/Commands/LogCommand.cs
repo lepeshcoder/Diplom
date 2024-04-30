@@ -67,7 +67,7 @@ public class LogCommand : Command,ICommand
                 {
                     Console.WriteLine("Repository doesn't have any commits");
                 }
-
+                
                 var allBranches = _branchService.GetAllBranches();
                 while (currentCommit != null)
                 {

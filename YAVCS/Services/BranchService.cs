@@ -86,4 +86,11 @@ public class BranchService : IBranchService
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         return File.ReadAllText(vcsRootDirectoryNavigator!.DetachedHeadFile).Length != 0;
     }
+
+    public string GetHeadCommitHash()
+    {
+        return IsDetachedHead() 
+            ? GetDetachedHeadCommitHash() 
+            : GetActiveBranch().CommitHash;
+    }
 }
