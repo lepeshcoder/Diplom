@@ -1,6 +1,5 @@
 ﻿using YAVCS;
 
-//TODO: Refactor Code on exceptions 
 //TODO: Comments
 
 //TODO: FINISH MERGE COMMAND (maybe status update on merge conflicts and create a mergeCommit)

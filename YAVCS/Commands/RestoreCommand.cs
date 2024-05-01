@@ -1,6 +1,4 @@
-﻿using System.Threading.Channels;
-using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
+﻿using YAVCS.Commands.Contracts;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -12,7 +10,8 @@ public class RestoreCommand : Command,ICommand
     private readonly IBlobService _blobService;
     private readonly IHashService _hashService;
 
-    public RestoreCommand(INavigatorService navigatorService, IIndexService indexService, IBlobService blobService, IHashService hashService)
+    public RestoreCommand(INavigatorService navigatorService, IIndexService indexService,
+        IBlobService blobService, IHashService hashService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
@@ -57,10 +56,10 @@ public class RestoreCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
                 var itemRelativePath = args[0];
-                var itemAbsolutePath = Environment.CurrentDirectory + '/' + itemRelativePath;
+                var itemAbsolutePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 
                 RestoreFile(itemAbsolutePath);
                 
@@ -79,7 +78,7 @@ public class RestoreCommand : Command,ICommand
         // if file no track
         if (indexRecord == null)
         {
-            throw new ItemNoTrackException($"item {fileRelativePath} not tracked");
+            throw new Exception($"item {fileRelativePath} not tracked");
         }
 
         if (File.Exists(fileAbsolutePath))
@@ -88,7 +87,7 @@ public class RestoreCommand : Command,ICommand
             var newHash = _hashService.GetHash(data);
             if (newHash == indexRecord.BlobHash)
             {
-                throw new FileNotModifiedException($"item {fileRelativePath} not modified");
+                throw new Exception($"item {fileRelativePath} not modified");
             }
             var restoredData = _blobService.GetBlobData(indexRecord.BlobHash);
             File.WriteAllBytes(fileAbsolutePath,restoredData);

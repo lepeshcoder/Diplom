@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -48,7 +47,7 @@ public class CommitCommand : Command, ICommand
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         if (vcsRootDirectoryNavigator == null)
         {
-            throw new RepositoryNotFoundException("Commit.Execute");
+            throw new Exception("repository not found");
         }
 
         var commandCase = GetCommandCase(args);
@@ -67,7 +66,7 @@ public class CommitCommand : Command, ICommand
             {
                 if (_commitService.IsIndexSameFromHead())
                 {
-                    throw new EmptyIndexException("There is nothing to commit");
+                    throw new Exception("There is nothing to commit");
                 }
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 var rootTreeHash = _treeService.CreateTreeByIndex();

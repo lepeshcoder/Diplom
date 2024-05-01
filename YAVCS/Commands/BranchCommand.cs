@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -58,7 +57,7 @@ public class BranchCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("");
+                    throw new Exception("repository not found");
                 }
                 var branches = _branchService.GetAllBranches();
                 foreach (var branch in branches)
@@ -73,7 +72,7 @@ public class BranchCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("");
+                    throw new Exception("repository not found");
                 }
                 var newBranchName = args[0];
                 if (File.Exists(vcsRootDirectoryNavigator.HeadsDirectory + Path.DirectorySeparatorChar + newBranchName))
@@ -89,7 +88,7 @@ public class BranchCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("");
+                    throw new Exception("repository not found");
                 }
                 var branchToDeleteName = args[1];
                 var branchToDelete = _branchService.GetBranchByName(branchToDeleteName);

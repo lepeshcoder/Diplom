@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -10,18 +9,14 @@ public class SwitchCommand : Command,ICommand
     private readonly INavigatorService _navigatorService;
     private readonly IBranchService _branchService;
     private readonly ITreeService _treeService;
-    private readonly IIndexService _indexService;
-    private readonly IBlobService _blobService;
     private readonly ICommitService _commitService;
 
     public SwitchCommand(INavigatorService navigatorService, IBranchService branchService,
-        ITreeService treeService, IIndexService indexService, IBlobService blobService, ICommitService commitService)
+        ITreeService treeService, ICommitService commitService)
     {
         _navigatorService = navigatorService;
         _branchService = branchService;
         _treeService = treeService;
-        _indexService = indexService;
-        _blobService = blobService;
         _commitService = commitService;
     }
 
@@ -63,7 +58,7 @@ public class SwitchCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
                 var branchToSwitchName = args[0];
                 var branchToSwitch = _branchService.GetBranchByName(branchToSwitchName);

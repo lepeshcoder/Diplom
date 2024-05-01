@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using spkl.Diffs;
 using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -9,8 +8,6 @@ namespace YAVCS.Commands;
 
 public class DiffCommand : Command,ICommand
 {
-
-
     private readonly INavigatorService _navigatorService;
     private readonly ICommitService _commitService;
     private readonly ITreeService _treeService;
@@ -64,7 +61,7 @@ public class DiffCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
 
                 var commitToCompareHash = args[0];

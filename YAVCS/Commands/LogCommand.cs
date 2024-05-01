@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Channels;
-using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
+﻿using YAVCS.Commands.Contracts;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -54,14 +51,13 @@ public class LogCommand : Command,ICommand
             case CommandCases.SyntaxError:
             {
                 throw new Exception("Invalid args format");
-                break;
             }
             case CommandCases.DefaultCase:
             {
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("Log.Execute");
+                    throw new Exception("repository not found");
                 }
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 var headCommit = _commitService.GetCommitByHash(headCommitHash);
@@ -84,7 +80,7 @@ public class LogCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("Log.Execute");
+                    throw new Exception("repository not found");
                 }
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 var headCommit = _commitService.GetCommitByHash(headCommitHash);

@@ -96,8 +96,6 @@ public static class App
                 new SwitchCommand(Services.GetRequiredService<INavigatorService>(),
                     Services.GetRequiredService<IBranchService>(),
                     Services.GetRequiredService<ITreeService>(),
-                    Services.GetRequiredService<IIndexService>(),
-                    Services.GetRequiredService<IBlobService>(),
                     Services.GetRequiredService<ICommitService>())
             },
             {
@@ -116,8 +114,7 @@ public static class App
                     Services.GetRequiredService<ICommitService>(),
                     Services.GetRequiredService<IMergeService>(),
                     Services.GetRequiredService<IBlobService>(),
-                    Services.GetRequiredService<IHashService>(),
-                    Services.GetRequiredService<IIndexService>())
+                    Services.GetRequiredService<IHashService>())
             }
             
         };

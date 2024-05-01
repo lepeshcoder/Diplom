@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -52,7 +51,7 @@ public class UnStageCommand : Command,ICommand
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         if (vcsRootDirectoryNavigator == null)
         {
-            throw new RepositoryNotFoundException("UnStageCommand.Execute");
+            throw new Exception("repository not found");
         }
         var commandCase = GetCommandCase(args);
         switch (commandCase)

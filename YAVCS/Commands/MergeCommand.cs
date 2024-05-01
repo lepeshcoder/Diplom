@@ -1,8 +1,6 @@
 ﻿using System.Text;
-using spkl.Diffs;
 using Verano.Diff3Way;
 using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -17,11 +15,10 @@ public class MergeCommand : Command,ICommand
     private readonly IMergeService _mergeService;
     private readonly IBlobService _blobService;
     private readonly IHashService _hashService;
-    private readonly IIndexService _indexService;
 
     public MergeCommand(INavigatorService navigatorService, IBranchService branchService,
         ITreeService treeService, ICommitService commitService, IMergeService mergeService,
-        IBlobService blobService, IHashService hashService, IIndexService indexService)
+        IBlobService blobService, IHashService hashService)
     {
         _navigatorService = navigatorService;
         _branchService = branchService;
@@ -30,7 +27,6 @@ public class MergeCommand : Command,ICommand
         _mergeService = mergeService;
         _blobService = blobService;
         _hashService = hashService;
-        _indexService = indexService;
     }
 
     private enum CommandCases
@@ -63,14 +59,13 @@ public class MergeCommand : Command,ICommand
             case CommandCases.SyntaxError:
             {
                 throw new Exception("Invalid args format");
-                break;
             }
             case CommandCases.DefaultCase:
             {
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
 
                 if (_branchService.IsDetachedHead())

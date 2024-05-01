@@ -1,6 +1,4 @@
-﻿using System.Threading.Channels;
-using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
+﻿using YAVCS.Commands.Contracts;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -59,7 +57,7 @@ public class StatusCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator is null)
                 {
-                    throw new RepositoryNotFoundException("Repository not found");
+                    throw new Exception("Repository not found");
                 }
                 
                 GetStatusInfo();

@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -66,13 +65,13 @@ public class ResetCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
                 var commitHash = args[1];
                 var newHeadCommit = _commitService.GetCommitByHash(commitHash);
                 if (newHeadCommit == null)
                 {
-                    throw new CommitNotFoundException(commitHash);
+                    throw new Exception("commit" + commitHash + "doesn't exist");
                 }
                 // set orig head
                 if (!_branchService.IsDetachedHead())
@@ -93,13 +92,13 @@ public class ResetCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
                 var commitHash = args[1];
                 var newHeadCommit = _commitService.GetCommitByHash(commitHash);
                 if (newHeadCommit == null)
                 {
-                    throw new CommitNotFoundException(commitHash);
+                    throw new Exception("commit" + commitHash + "doesn't exist");
                 }
                 
                 _treeService.ResetIndexToState(newHeadCommit.TreeHash);
@@ -122,13 +121,13 @@ public class ResetCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("not a part of repository");
+                    throw new Exception("not a part of repository");
                 }
                 var commitHash = args[1];
                 var newHeadCommit = _commitService.GetCommitByHash(commitHash);
                 if (newHeadCommit == null)
                 {
-                    throw new CommitNotFoundException(commitHash);
+                    throw new Exception("commit" + commitHash + "doesn't exist");
                 }
                 
                 _treeService.ResetIndexToState(newHeadCommit.TreeHash);

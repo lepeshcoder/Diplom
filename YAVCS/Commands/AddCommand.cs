@@ -1,5 +1,4 @@
 ﻿using YAVCS.Commands.Contracts;
-using YAVCS.Exceptions;
 using YAVCS.Models;
 using YAVCS.Services.Contracts;
 
@@ -64,7 +63,7 @@ public class AddCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    throw new RepositoryNotFoundException("Not a part of repository");
+                    throw new Exception("Not a part of repository");
                 }
                 // check for item exists
                 var itemRelativePath = args[0];
@@ -133,7 +132,7 @@ public class AddCommand : Command,ICommand
             // if file isn't modify
             if (oldRecord.BlobHash == newHash)
             {
-                throw new ItemAlreadyStagedException("File is already staged and not modified");
+                throw new Exception("File is already staged and not modified");
             }
             // if file modified
             else
@@ -178,7 +177,7 @@ public class AddCommand : Command,ICommand
                 {
                     StageFile(entry);   
                 }
-                catch (ItemAlreadyStagedException e)
+                catch (Exception e)
                 {
                    // ignore item is already staged exception   
                 }   
