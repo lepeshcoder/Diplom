@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Diff3")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bc5bd299ca0a28cd49a5b48af6cbccc7114bbd9b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e06a71e34ff5c1e7e14525a0931a06639b16da59")]
 [assembly: System.Reflection.AssemblyProductAttribute("Diff3")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Diff3")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -52,15 +52,14 @@ public class StatusCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.DefaultCase:
             {
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator is null)
                 {
-                    throw new RepositoryNotFoundException("StatusCommand.Execute");
+                    throw new RepositoryNotFoundException("Repository not found");
                 }
                 
                 GetStatusInfo();
@@ -179,11 +178,10 @@ public class StatusCommand : Command,ICommand
                 }
                 else
                 {
-                    var entryRelativePath = Path.GetRelativePath(repositoryRootDirectory, entry) + '/';
+                    var entryRelativePath = Path.GetRelativePath(repositoryRootDirectory, entry) + Path.DirectorySeparatorChar;
                     items.Add(entryRelativePath);
                 }
             }
-            else throw new Exception("Unknown entry");
         }
         
         if (isDirHidden)

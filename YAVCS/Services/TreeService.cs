@@ -128,6 +128,18 @@ public class TreeService : ITreeService
         _indexService.SaveChanges();
     }
 
+    public void DeleteTree(string commitRootTreeHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var treeChilds = GetTreeByHash(commitRootTreeHash).Childs;
+        var treePath = vcsRootDirectoryNavigator!.TreesDirectory + Path.DirectorySeparatorChar + commitRootTreeHash;
+        File.Delete(treePath);
+        foreach (var child in treeChilds.Values.Where(child => child.Type == (int)ChildItemModel.Types.Tree))
+        {
+            DeleteTree(child.Hash);
+        }
+    }
+
     private string GetTreeHash(TreeFileModel tree,Dictionary<string,TreeFileModel> treesByRelativePath,string path = "")
     {
         var temp = "";

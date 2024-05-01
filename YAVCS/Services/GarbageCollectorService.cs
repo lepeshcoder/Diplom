@@ -8,18 +8,56 @@ public class GarbageCollectorService : IGarbageCollectorService
     private readonly INavigatorService _navigatorService;
     private readonly ITreeService _treeService;
     private readonly IBlobService _blobService;
+    private readonly IBranchService _branchService;
+    private readonly ICommitService _commitService;
 
-    public GarbageCollectorService(INavigatorService navigatorService, ITreeService treeService, IBlobService blobService)
+    public GarbageCollectorService(INavigatorService navigatorService, ITreeService treeService,
+        IBlobService blobService, IBranchService branchService, ICommitService commitService)
     {
         _navigatorService = navigatorService;
         _treeService = treeService;
         _blobService = blobService;
+        _branchService = branchService;
+        _commitService = commitService;
     }
 
     public void CollectGarbage()
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var commitDirectory = vcsRootDirectoryNavigator!.CommitsDirectory;
+
+        var allBranches = _branchService.GetAllBranches();
+        var allCommitsHashes = _commitService.GetAllCommitsHashes();
+        // get all unreachable commits
+        foreach (var branch in allBranches)
+        {
+            var branchHeadCommit = _commitService.GetCommitByHash(branch.CommitHash);
+            var ancestors = new Queue<string>([branchHeadCommit!.Hash]);
+            var commitHashesList = new List<string>();
+            while (ancestors.Count != 0)
+            {
+                var ancestorCommit = _commitService.GetCommitByHash(ancestors.Dequeue());
+                commitHashesList.Add(ancestorCommit!.Hash);
+                foreach (var ancestorCommitParentHash in ancestorCommit!.ParentCommitHashes)
+                {
+                    ancestors.Enqueue(ancestorCommitParentHash);
+                }
+            }
+
+            foreach (var commitHash in commitHashesList)
+            {
+                allCommitsHashes.Remove(commitHash);
+            }
+        }
+
+        // remove unreachable commits and it's root trees
+        foreach (var commitHash in allCommitsHashes)
+        {
+            var commitRootTreeHash = _commitService.GetCommitByHash(commitHash)!.TreeHash;
+            _treeService.DeleteTree(commitRootTreeHash);
+            _commitService.DeleteCommit(commitHash);
+        }
+        
         // get all blobs hashes from blobs directory 
         var blobsHashes = _blobService.GetAllBlobs();
         // go through each commit and delete blob hashes there are in use

@@ -51,8 +51,7 @@ public class BranchCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.ShowBranches:
             {
@@ -79,7 +78,7 @@ public class BranchCommand : Command,ICommand
                 var newBranchName = args[0];
                 if (File.Exists(vcsRootDirectoryNavigator.HeadsDirectory + Path.DirectorySeparatorChar + newBranchName))
                 {
-                    Console.WriteLine($"Branch {newBranchName} already exist");
+                    throw new Exception($"Branch {newBranchName} already exist");
                 }
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 _branchService.CreateBranch(new BranchFileModel(newBranchName,headCommitHash));
@@ -107,7 +106,7 @@ public class BranchCommand : Command,ICommand
                     {
                         throw new ArgumentException("Cannot delete previous active branch in detached head state");
                     }
-                    if (branchToDeleteName == "Master")
+                    if (branchToDeleteName.ToLower() == "master")
                     {
                         throw new ArgumentException("Can't Delete Branch Master");
                     }
@@ -122,7 +121,7 @@ public class BranchCommand : Command,ICommand
                     {
                         throw new ArgumentException("Cannot delete active Branch");
                     }
-                    if (branchToDeleteName == "Master")
+                    if (branchToDeleteName.ToLower() == "master")
                     {
                         throw new ArgumentException("Can't Delete Branch Master");
                     }

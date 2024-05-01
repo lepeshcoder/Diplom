@@ -59,8 +59,7 @@ public class ResetCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.SoftReset:
             {

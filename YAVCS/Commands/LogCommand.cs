@@ -53,7 +53,7 @@ public class LogCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
+                throw new Exception("Invalid args format");
                 break;
             }
             case CommandCases.DefaultCase:
@@ -125,7 +125,6 @@ public class LogCommand : Command,ICommand
         }
         Console.WriteLine($"\nCommit message: {commit.Message}");
         Console.WriteLine($"Commit Time: {commit.CreatedAt}");
-        Console.WriteLine($"Commit Hash:{commit.Hash}");
-        Console.WriteLine('\n');
+        Console.WriteLine($"Commit Hash:{commit.Hash}\n");
     }
 }

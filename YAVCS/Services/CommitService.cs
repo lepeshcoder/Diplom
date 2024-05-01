@@ -54,4 +54,19 @@ public class CommitService : ICommitService
         var headRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash).Values.ToHashSet();
         return currentRecords.SetEquals(headRecords);
     }
+
+    public HashSet<string> GetAllCommitsHashes()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        return Directory.GetFiles(vcsRootDirectoryNavigator!.CommitsDirectory)
+            .Select(path=> Path.GetRelativePath(vcsRootDirectoryNavigator.CommitsDirectory,path))
+            .ToHashSet();
+    }
+
+    public void DeleteCommit(string commitHash)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var commitFilePath = vcsRootDirectoryNavigator!.CommitsDirectory + Path.DirectorySeparatorChar + commitHash;
+        File.Delete(commitFilePath);
+    }
 }

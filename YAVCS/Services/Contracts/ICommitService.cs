@@ -11,5 +11,7 @@ public interface ICommitService
     Dictionary<string,IndexRecord> GetHeadRecordsByPath();
 
     bool IsIndexSameFromHead();
-    
+
+    HashSet<string> GetAllCommitsHashes();
+    void DeleteCommit(string commitHash);
 }

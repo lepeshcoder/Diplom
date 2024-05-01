@@ -61,8 +61,7 @@ public class CommitCommand : Command, ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.DefaultCase:
             {
@@ -84,10 +83,9 @@ public class CommitCommand : Command, ICommand
                 {
                     var activeBranch = _branchService.GetActiveBranch();
                     _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
+                    _garbageCollectorService.CollectGarbage();
                 }
-               
-                _garbageCollectorService.CollectGarbage();
-                 break; 
+                break; 
             }
         }
     }

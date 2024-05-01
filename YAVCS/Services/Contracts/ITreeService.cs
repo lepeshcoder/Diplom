@@ -18,4 +18,5 @@ public interface ITreeService
    void ResetWorkingDirectoryToState(string treeHash);
    void ResetIndexToState(string treeHash);
 
+   void DeleteTree(string commitRootTreeHash);
 }

@@ -56,8 +56,7 @@ public class SwitchCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args Format");
-                break;
+                throw new Exception("Invalid args Format");
             }
             case CommandCases.DefaultCase:
             {

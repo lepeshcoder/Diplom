@@ -56,8 +56,7 @@ public class AddCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.AddItem:
             {
@@ -72,14 +71,7 @@ public class AddCommand : Command,ICommand
                 var itemAbsolutePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 if (File.Exists(itemAbsolutePath))
                 {
-                    try
-                    {
-                        StageFile(itemRelativePath);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
+                    StageFile(itemRelativePath);
                 }
                 else if (Directory.Exists(itemAbsolutePath))
                 {
@@ -92,7 +84,7 @@ public class AddCommand : Command,ICommand
                     var oldRecord = _indexService.TryGetRecordByPath(relativePath);
                     if (oldRecord == null)
                     {
-                        Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                        throw new Exception($"{itemAbsolutePath} doesn't exist");
                     }
                     else
                     {
@@ -107,8 +99,7 @@ public class AddCommand : Command,ICommand
                 var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
                 if (vcsRootDirectoryNavigator == null)
                 {
-                    Console.WriteLine("Repository doesn't exist");
-                    return;
+                    throw new Exception("Repository doesn't exist");
                 }
                 StageDirectory(vcsRootDirectoryNavigator.RepositoryRootDirectory);
                 break;

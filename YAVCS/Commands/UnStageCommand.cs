@@ -64,8 +64,7 @@ public class UnStageCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Args syntax error");
-                break;
+                throw new Exception("Args syntax error");
             }
             case CommandCases.ForceCase:
             {
@@ -79,13 +78,13 @@ public class UnStageCommand : Command,ICommand
                 {
                     UnStageDirectory(itemAbsolutePath,true);
                 }
-                else Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                else throw new Exception($"{itemAbsolutePath} doesn't exist");
                 break;
             }
             case CommandCases.DefaultCase:
             {
                 var itemRelativePath = args[0];
-                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + '\\' + itemRelativePath;
+                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 if (File.Exists(itemAbsolutePath))
                 {
                     UnStageFile(itemRelativePath);
@@ -94,7 +93,7 @@ public class UnStageCommand : Command,ICommand
                 {
                     UnStageDirectory(itemAbsolutePath);
                 }
-                else Console.WriteLine($"{itemAbsolutePath} doesn't exist");
+                else throw new Exception($"{itemAbsolutePath} doesn't exist");
                 break;
             }
             case CommandCases.UnStageAll:
@@ -153,7 +152,7 @@ public class UnStageCommand : Command,ICommand
                 }
                 catch (Exception e)
                 {
-                    
+                    // ignore file isn't staged exception   
                 }
             }
             else if (Directory.Exists(entry))

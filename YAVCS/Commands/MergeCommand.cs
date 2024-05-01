@@ -62,7 +62,7 @@ public class MergeCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
+                throw new Exception("Invalid args format");
                 break;
             }
             case CommandCases.DefaultCase:

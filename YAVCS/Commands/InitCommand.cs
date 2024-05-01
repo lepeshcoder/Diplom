@@ -71,8 +71,7 @@ public class InitCommand : Command,ICommand
                 // if directory is a part of repository 
                 if (vcsRootDirectoryNavigator != null)
                 {
-                    Console.WriteLine("Repository already exists in " + vcsRootDirectoryNavigator.RepositoryRootDirectory);
-                    return;
+                    throw new Exception($"Repository already exists in {vcsRootDirectoryNavigator.RepositoryRootDirectory}");
                 }
                 // otherwise create .yavcs directory
                 CreateVcsRootDirectory(workingDirectory);

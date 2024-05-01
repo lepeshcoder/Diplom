@@ -50,8 +50,7 @@ public class RestoreCommand : Command,ICommand
             }
             case CommandCases.SyntaxError:
             {
-                Console.WriteLine("Invalid args format");
-                break;
+                throw new Exception("Invalid args format");
             }
             case CommandCases.DefaultCase:
             {
@@ -62,19 +61,9 @@ public class RestoreCommand : Command,ICommand
                 }
                 var itemRelativePath = args[0];
                 var itemAbsolutePath = Environment.CurrentDirectory + '/' + itemRelativePath;
-                try
-                {
-                    RestoreFile(itemAbsolutePath);
-                }
-                catch (ItemNoTrackException e)
-                {
-                    Console.WriteLine($"File {e.Message} isn't tracked");
-                }
-                catch (FileNotModifiedException e)
-                {
-                    Console.WriteLine($"File {e.Message} isn't modify");
-                }
-               
+                
+                RestoreFile(itemAbsolutePath);
+                
                 break;
             }
         }
@@ -90,7 +79,7 @@ public class RestoreCommand : Command,ICommand
         // if file no track
         if (indexRecord == null)
         {
-            throw new ItemNoTrackException(fileRelativePath);
+            throw new ItemNoTrackException($"item {fileRelativePath} not tracked");
         }
 
         if (File.Exists(fileAbsolutePath))
@@ -99,7 +88,7 @@ public class RestoreCommand : Command,ICommand
             var newHash = _hashService.GetHash(data);
             if (newHash == indexRecord.BlobHash)
             {
-                throw new FileNotModifiedException(fileRelativePath);
+                throw new FileNotModifiedException($"item {fileRelativePath} not modified");
             }
             var restoredData = _blobService.GetBlobData(indexRecord.BlobHash);
             File.WriteAllBytes(fileAbsolutePath,restoredData);
