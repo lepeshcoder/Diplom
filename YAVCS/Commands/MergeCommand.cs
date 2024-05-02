@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using SynchrotronNet;
 using Verano.Diff3Way;
 using YAVCS.Commands.Contracts;
 using YAVCS.Models;
@@ -33,7 +34,8 @@ public class MergeCommand : Command,ICommand
     {
         SyntaxError = 0,
         HelpCase = 1,
-        DefaultCase = 2
+        DefaultCase = 2,
+        AbortCase = 3
     }
     
     protected override Enum GetCommandCase(string[] args)
@@ -41,6 +43,7 @@ public class MergeCommand : Command,ICommand
         return args switch
         {
             ["--help"] => CommandCases.HelpCase,
+            ["--abort"] => CommandCases.AbortCase,
             _ when args.Length == 1 => CommandCases.DefaultCase,
             _ => CommandCases.SyntaxError
         };
@@ -59,6 +62,20 @@ public class MergeCommand : Command,ICommand
             case CommandCases.SyntaxError:
             {
                 throw new Exception("Invalid args format");
+            }
+            case CommandCases.AbortCase:
+            {
+                if (!_mergeService.IsOnMergeConflict())
+                {
+                    throw new Exception("Cannot abort merge, there are not any merge Conflicts");
+                }
+
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                var headCommit = _commitService.GetCommitByHash(headCommitHash);
+                _treeService.ResetIndexToState(headCommit!.TreeHash);
+                _treeService.ResetWorkingDirectoryToState(headCommit.TreeHash);
+                _mergeService.ResetMergeConflictSign();
+                break;
             }
             case CommandCases.DefaultCase:
             {
@@ -224,25 +241,28 @@ public class MergeCommand : Command,ICommand
             var secondBranchFileBytes =
                 _blobService.GetBlobData(secondBranchPatch.FilesToAdd[bothAddedKey].BlobHash);
             var firstBranchFileLines = Encoding.UTF8.GetString(firstBranchFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
+                .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
             var secondBranchFileLines = Encoding.UTF8.GetString(secondBranchFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
+                .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
             string[] baseCommitFileLines = [];
-            var merge = new Merge();
-            var result =  merge.Merge3Way(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, 
-                firstBranchPatch.BranchName, "base", secondBranchPatch.BranchName);
-           
-            if (result.IsConflict)
+
+            var merge = Diff.diff3_merge(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, true);
+            var isConflict = merge.Exists(block => block is Diff.MergeConflictResultBlock resultBlock &&
+                                                   resultBlock.LeftLines.Length != 0 &&
+                                                   resultBlock.RightLines.Length != 0);
+            var mergedFile = CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
+            
+            if (isConflict)
             {
                 var relativePath = firstBranchPatch.FilesToAdd[bothAddedKey].RelativePath;
                 var absolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + Path.DirectorySeparatorChar + relativePath;
                 File.Delete(absolutePath);
-                File.WriteAllLines(absolutePath,result.Result);
+                File.WriteAllLines(absolutePath,mergedFile);
                 conflictsPaths.Add(relativePath);
             }
             else
             {
-                var mergedFileText = string.Join('\n', result.Result);
+                var mergedFileText = string.Join('\n', mergedFile);
                 var mergedFileHash = _hashService.GetHash(mergedFileText);
                 if (!_blobService.IsBlobExist(mergedFileHash))
                 {
@@ -261,26 +281,30 @@ public class MergeCommand : Command,ICommand
             var baseCommitFileBytes =
                 _blobService.GetBlobData(baseCommitIndexRecords[bothModifiedFileKey].BlobHash);
             var firstBranchFileLines = Encoding.UTF8.GetString(firstBranchFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
+                .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
             var secondBranchFileLines = Encoding.UTF8.GetString(secondBranchFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
+                .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
             var baseCommitFileLines = Encoding.UTF8.GetString(baseCommitFileBytes)
-                .Split([Environment.NewLine], StringSplitOptions.None);
-            var merge = new Merge();
-            var result =  merge.Merge3Way(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, 
-                firstBranchPatch.BranchName, "base", secondBranchPatch.BranchName);
+                .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
+            
+            var merge = Diff.diff3_merge(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, true);
+            var isConflict = merge.Exists(block => block is Diff.MergeConflictResultBlock resultBlock &&
+                                                   (resultBlock.LeftLines.Length != 0 &&
+                                                    resultBlock.RightLines.Length != 0));
+            var mergedFile = CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
+
            
-            if (result.IsConflict)
+            if (isConflict)
             {
                 var relativePath = baseCommitIndexRecords[bothModifiedFileKey].RelativePath;
                 var absolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + Path.DirectorySeparatorChar + relativePath;
                 File.Delete(absolutePath);
-                File.WriteAllLines(absolutePath,result.Result);
+                File.WriteAllLines(absolutePath,mergedFile);
                 conflictsPaths.Add(relativePath);
             }
             else
             {
-                var mergedFileText = string.Join('\n', result.Result);
+                var mergedFileText = string.Join('\n', mergedFile);
                 var mergedFileHash = _hashService.GetHash(mergedFileText);
                 if (!_blobService.IsBlobExist(mergedFileHash))
                 {
@@ -292,5 +316,39 @@ public class MergeCommand : Command,ICommand
         }
         
         return new MergeResultModel(baseCommitIndexRecords,conflictsPaths);
+    }
+
+    private string[] CreateMergeResult(List<Diff.IMergeResultBlock> blocks,string firstBranchName,string secondBranchName)
+    {
+        var charCount = 6;
+        var result = new List<string>();
+        foreach (var block in blocks)
+        {
+    
+            if (block is Diff.MergeConflictResultBlock resultBlock)
+            {
+                if (resultBlock.LeftLines.Length == 0)
+                {
+                    result.AddRange(resultBlock.RightLines);
+                }
+                else if (resultBlock.RightLines.Length == 0)
+                {
+                    result.AddRange(resultBlock.LeftLines);
+                }
+                else
+                {
+                    result.Add("<<<<<<" + firstBranchName);
+                    result.AddRange(resultBlock.LeftLines);
+                    result.Add("======" + "");
+                    result.AddRange(resultBlock.RightLines);
+                    result.Add(">>>>>>" + secondBranchName);
+                }
+            }
+            else
+            {
+                result.AddRange((block as Diff.MergeOKResultBlock)!.ContentLines);
+            }
+        }
+        return result.ToArray();
     }
 }

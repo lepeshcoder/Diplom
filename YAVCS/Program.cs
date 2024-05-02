@@ -12,7 +12,14 @@
 // high priority
 //TODO: Fix Diff and merge resolves
 //TODO: WRITE TEST AND TEST THAT ALL
+//TODO: merge --abort
+
 
 App.Configure();
-App.Run(args); 
+App.Run(args);
+
+
+
+
+
 

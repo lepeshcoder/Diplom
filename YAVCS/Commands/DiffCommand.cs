@@ -110,9 +110,9 @@ public class DiffCommand : Command,ICommand
                     var currentCommitFileBytes = _blobService.GetBlobData(headCommitIndexRecords[relativePath].BlobHash);
                     var commitToCompareFileBytes = _blobService.GetBlobData(commitToCompareIndexRecords[relativePath].BlobHash); 
                     var currentCommitFileText =  Encoding.UTF8.GetString(currentCommitFileBytes)
-                        .Split([Environment.NewLine], StringSplitOptions.None);
+                        .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
                     var commitToCompareFileText = Encoding.UTF8.GetString(commitToCompareFileBytes)
-                        .Split([Environment.NewLine], StringSplitOptions.None);
+                        .Split([Environment.NewLine,"\n"], StringSplitOptions.None);
                     var metaData = $"\n{relativePath}:\n";
                     Console.WriteLine(metaData+"\n");
                     var diffResult = GetDiff(commitToCompareFileText, currentCommitFileText);
@@ -143,9 +143,9 @@ public class DiffCommand : Command,ICommand
             var linesToDelete = previousVersion.Skip(part.LineA).Take(part.CountA).Select(line => "- " + line).ToList();
             var linesToAdd = currentVersion.Skip(part.LineB).Take(part.CountB).Select(line => "+ " + line).ToList();
 
-            var linesAfterDifference = (part.LineA < previousVersion.Length - 2
-                ? previousVersion.Skip(part.LineA + 1).Take(2).ToArray()
-                : previousVersion.Take(new Range(part.LineA + 1,previousVersion.Length - 1))).ToList();
+            var linesAfterDifference = (part.LineA + linesToDelete.Count < previousVersion.Length - 2
+                ? previousVersion.Skip(part.LineA + linesToDelete.Count).Take(2).ToArray()
+                : previousVersion.Take(new Range(part.LineA + linesToDelete.Count,previousVersion.Length))).ToList();
 
             
             result.Lines.AddRange(linesBeforeDifference);

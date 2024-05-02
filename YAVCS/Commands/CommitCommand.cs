@@ -91,7 +91,7 @@ public class CommitCommand : Command, ICommand
                 {
                     var activeBranch = _branchService.GetActiveBranch();
                     _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
-                    _garbageCollectorService.CollectGarbage();
+                   // _garbageCollectorService.CollectGarbage();
                 }
                 break; 
             }

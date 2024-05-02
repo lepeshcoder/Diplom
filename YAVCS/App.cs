@@ -122,6 +122,11 @@ public static class App
 
     public static void Run(string[] args)
     {
+        if (args is [] or ["--help"] or ["--h"])
+        {
+            Console.WriteLine("yavcs is a...");
+            return;
+        }
         var command = args[0];
         if(!_commands.ContainsKey(command)) Console.WriteLine("No such command");
         else
