@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YAVCS", "YAVCS\YAVCS.csproj", "{42F2B5A4-6840-4981-ABC1-35CAA9F28A45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diffs", "C:\Users\nelep\OneDrive\Рабочий стол\kal2\Diffs\src\Diffs.csproj", "{68843AA3-9A63-4AC1-BA89-3EEB434680F7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diff3", "Diff3\Diff3.csproj", "{045CC4E4-3C69-420F-9F33-9C6099B63AF6}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		{42F2B5A4-6840-4981-ABC1-35CAA9F28A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42F2B5A4-6840-4981-ABC1-35CAA9F28A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42F2B5A4-6840-4981-ABC1-35CAA9F28A45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68843AA3-9A63-4AC1-BA89-3EEB434680F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68843AA3-9A63-4AC1-BA89-3EEB434680F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68843AA3-9A63-4AC1-BA89-3EEB434680F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68843AA3-9A63-4AC1-BA89-3EEB434680F7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{045CC4E4-3C69-420F-9F33-9C6099B63AF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{045CC4E4-3C69-420F-9F33-9C6099B63AF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{045CC4E4-3C69-420F-9F33-9C6099B63AF6}.Release|Any CPU.ActiveCfg = Release|Any CPU

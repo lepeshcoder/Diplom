@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Verano.Diff3Way;
 
-namespace Verano.Diff3Way
+namespace Diff3
 {
     public class Chunk
     {
