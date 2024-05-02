@@ -19,10 +19,10 @@ public class MergeService : IMergeService
         return File.Exists(vcsRootDirectoryNavigator!.MergeConflictFile);
     }
 
-    public void SetMergeConflictSign()
+    public void SetMergeConflictSign(string branchIntoMergeCommitHash, string branchToMergeCommitHash)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
-        using (var fs = File.Create(vcsRootDirectoryNavigator!.MergeConflictFile )) {};
+        File.WriteAllLines(vcsRootDirectoryNavigator!.MergeConflictFile,[branchIntoMergeCommitHash,branchToMergeCommitHash]);
     }
 
     public void ResetMergeConflictSign()
@@ -87,5 +87,11 @@ public class MergeService : IMergeService
         }
 
         return null;
+    }
+
+    public string[] GetMergeBranches()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        return File.ReadAllLines(vcsRootDirectoryNavigator!.MergeConflictFile);
     }
 }

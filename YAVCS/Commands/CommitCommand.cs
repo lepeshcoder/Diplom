@@ -7,21 +7,21 @@ public class CommitCommand : Command, ICommand
 {
 
     private readonly INavigatorService _navigatorService;
-    private readonly IIndexService _indexService;
     private readonly ITreeService _treeService;
     private readonly ICommitService _commitService;
     private readonly IGarbageCollectorService _garbageCollectorService;
     private readonly IBranchService _branchService;
+    private readonly IMergeService _mergeService;
 
-    public CommitCommand(INavigatorService navigatorService, IIndexService indexService,
-        ITreeService treeService, ICommitService commitService, IGarbageCollectorService garbageCollectorService, IBranchService branchService)
+    public CommitCommand(INavigatorService navigatorService, ITreeService treeService, ICommitService commitService,
+        IGarbageCollectorService garbageCollectorService, IBranchService branchService, IMergeService mergeService)
     {
         _navigatorService = navigatorService;
-        _indexService = indexService;
         _treeService = treeService;
         _commitService = commitService;
         _garbageCollectorService = garbageCollectorService;
         _branchService = branchService;
+        _mergeService = mergeService;
     }
 
     private enum CommandCases
@@ -68,12 +68,21 @@ public class CommitCommand : Command, ICommand
                 {
                     throw new Exception("There is nothing to commit");
                 }
+                
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 var rootTreeHash = _treeService.CreateTreeByIndex();
                 var commitMessage = args.Aggregate("", (current, arg) => current + arg + " ");
-                var parentCommitHash = headCommitHash;
-                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,[parentCommitHash]);
+                var parentCommitHashes = (_mergeService.IsOnMergeConflict()
+                    ?_mergeService.GetMergeBranches() 
+                    :[headCommitHash])
+                    .ToList();
+                var newCommit = _commitService.CreateCommit(rootTreeHash,DateTime.Now,commitMessage,parentCommitHashes);
 
+                if (_mergeService.IsOnMergeConflict())
+                {
+                    _mergeService.ResetMergeConflictSign();
+                }
+                
                 if (_branchService.IsDetachedHead())
                 {
                     _branchService.SetHead(newCommit.Hash);

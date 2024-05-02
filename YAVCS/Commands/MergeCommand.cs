@@ -82,13 +82,6 @@ public class MergeCommand : Command,ICommand
 
                 var activeBranch = _branchService.GetActiveBranch();
                 
-                if (_mergeService.IsOnMergeConflict())
-                {
-                    // проверям устранены ли конфликты в файлах
-                    // создаём виртуальный коммит
-                    // перемещам уазатель ветки на этот виртуальный коммит
-                }
-                
                 // Get head commits of 2 branches
                 var activeBranchHeadCommit = _commitService.GetCommitByHash(activeBranch.CommitHash);
                 var branchToMergeHeadCommit = _commitService.GetCommitByHash(branchToMerge.CommitHash);
@@ -144,7 +137,7 @@ public class MergeCommand : Command,ICommand
                     {
                         Console.WriteLine(conflictPath);
                     }
-                    _mergeService.SetMergeConflictSign();
+                    _mergeService.SetMergeConflictSign(activeBranchHeadCommit.Hash,branchToMergeHeadCommit.Hash);
                 }
                 break;
             }
@@ -166,7 +159,7 @@ public class MergeCommand : Command,ICommand
         
         var modifiedFiles = modifiedCommitIndexRecords
             .Where(pair => baseCommitIndexRecords.ContainsKey(pair.Key) &&
-                           pair.Value.BlobHash != modifiedCommitIndexRecords[pair.Key].BlobHash)
+                           pair.Value.BlobHash != baseCommitIndexRecords[pair.Key].BlobHash)
             .ToDictionary(pair => pair.Key, pair => pair.Value);
         
         
@@ -177,21 +170,19 @@ public class MergeCommand : Command,ICommand
     {
         var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(baseCommit.TreeHash);
 
-        foreach (var fileToAdd in firstBranchPatch.FilesToAdd.Values)
+        var onlyAddedInFirstBranchKeys = firstBranchPatch.FilesToAdd.Keys.Except(secondBranchPatch.FilesToAdd.Keys);
+        var onlyAddedInSecondBranchKeys = secondBranchPatch.FilesToAdd.Keys.Except(firstBranchPatch.FilesToAdd.Keys);
+        var bothAddedKeys = firstBranchPatch.FilesToAdd.Keys.Intersect(secondBranchPatch.FilesToAdd.Keys);
+
+        foreach (var onlyAddedInFirstBranchKey in onlyAddedInFirstBranchKeys)
         {
-            baseCommitIndexRecords.TryAdd(fileToAdd.RelativePath, fileToAdd);
+            var record = firstBranchPatch.FilesToAdd[onlyAddedInFirstBranchKey];
+            baseCommitIndexRecords.TryAdd(record.RelativePath, record);
         }
-        foreach (var fileToAdd in secondBranchPatch.FilesToAdd.Values)
+        foreach (var onlyAddedInSecondBranchKey in onlyAddedInSecondBranchKeys)
         {
-            baseCommitIndexRecords.TryAdd(fileToAdd.RelativePath, fileToAdd);
-        }
-        foreach (var fileToDelete in firstBranchPatch.FilesToDelete.Values)
-        {
-            baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
-        }
-        foreach (var fileToDelete in secondBranchPatch.FilesToDelete.Values)
-        {
-            baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
+            var record = secondBranchPatch.FilesToAdd[onlyAddedInSecondBranchKey];
+            baseCommitIndexRecords.TryAdd(record.RelativePath, record);
         }
         
         // file that modify only in first branch
@@ -211,9 +202,56 @@ public class MergeCommand : Command,ICommand
             baseCommitIndexRecords.Remove(modifiedFileKey);
             baseCommitIndexRecords.Add(modifiedFileKey,indexRecord);
         }
+         
+        foreach (var fileToDelete in firstBranchPatch.FilesToDelete.Values)
+        {
+            baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
+        }
+        foreach (var fileToDelete in secondBranchPatch.FilesToDelete.Values)
+        {
+            baseCommitIndexRecords.Remove(fileToDelete.RelativePath);
+        }
+        
+     
 
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
         var conflictsPaths = new List<string>();
+
+        foreach (var bothAddedKey in bothAddedKeys)
+        {
+             var firstBranchFileBytes =
+                _blobService.GetBlobData(firstBranchPatch.FilesToAdd[bothAddedKey].BlobHash);
+            var secondBranchFileBytes =
+                _blobService.GetBlobData(secondBranchPatch.FilesToAdd[bothAddedKey].BlobHash);
+            var firstBranchFileLines = Encoding.UTF8.GetString(firstBranchFileBytes)
+                .Split([Environment.NewLine], StringSplitOptions.None);
+            var secondBranchFileLines = Encoding.UTF8.GetString(secondBranchFileBytes)
+                .Split([Environment.NewLine], StringSplitOptions.None);
+            string[] baseCommitFileLines = [];
+            var merge = new Merge();
+            var result =  merge.Merge3Way(firstBranchFileLines, baseCommitFileLines, secondBranchFileLines, 
+                firstBranchPatch.BranchName, "base", secondBranchPatch.BranchName);
+           
+            if (result.IsConflict)
+            {
+                var relativePath = firstBranchPatch.FilesToAdd[bothAddedKey].RelativePath;
+                var absolutePath = vcsRootDirectoryNavigator!.RepositoryRootDirectory + Path.DirectorySeparatorChar + relativePath;
+                File.Delete(absolutePath);
+                File.WriteAllLines(absolutePath,result.Result);
+                conflictsPaths.Add(relativePath);
+            }
+            else
+            {
+                var mergedFileText = string.Join('\n', result.Result);
+                var mergedFileHash = _hashService.GetHash(mergedFileText);
+                if (!_blobService.IsBlobExist(mergedFileHash))
+                {
+                    _blobService.CreateBlob(Encoding.UTF8.GetBytes(mergedFileText));
+                }
+                baseCommitIndexRecords.Add(bothAddedKey,new IndexRecord(bothAddedKey,mergedFileHash));
+            }
+        }
+        
         foreach (var bothModifiedFileKey in bothModifiedFilesKeys)
         {
             var firstBranchFileBytes =

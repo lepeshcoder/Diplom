@@ -58,11 +58,11 @@ public static class App
             {
                 "commit",
                 new CommitCommand(Services.GetRequiredService<INavigatorService>(),
-                    Services.GetRequiredService<IIndexService>(),
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<ICommitService>(),
                     Services.GetRequiredService<IGarbageCollectorService>(),
-                    Services.GetRequiredService<IBranchService>())
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<IMergeService>())
             },
             {
                 "log",

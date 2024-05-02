@@ -6,9 +6,11 @@ public interface IMergeService
 {
     bool IsOnMergeConflict();
 
-    void SetMergeConflictSign();
+    void SetMergeConflictSign(string branchIntoMergeCommitHash, string branchToMergeCommitHash);
 
     void ResetMergeConflictSign();
 
     CommitFileModel? GetCommonAncestor(string firstCommitHash, string secondCommitHash);
+
+    string[] GetMergeBranches();
 }

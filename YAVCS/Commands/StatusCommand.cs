@@ -124,7 +124,15 @@ public class StatusCommand : Command,ICommand
                     _stagedItems.Add($"modified: {recordPath}");
                 }
             }
-        } 
+        }
+
+        var deletedItemsKeys = headRecordsByPath.Keys.Except(indexRecordsByPath.Keys);
+        foreach (var deletedItemKey in deletedItemsKeys)
+        {
+            var deletedRecord = headRecordsByPath[deletedItemKey];
+            _stagedItems.Add($"deleted: {deletedRecord.RelativePath}");
+        }
+        
         //fill unstaged items
         foreach (var indexRecord in indexRecordsByPath.Values)
         {
