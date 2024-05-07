@@ -31,4 +31,6 @@ public class VcsRootDirectoryNavigator(string absoluteRepositoryPath)
     public string OrigHeadFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.OrigHeadFile;
     public string MergeConflictFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.MergeConflictFile;
     public string PreviousBranchFile => VcsRootDirectory + Path.DirectorySeparatorChar + FileSystemConstants.PreviousBranchFile;
+    public string StashCommitsDirectory => ObjectsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.StashCommitsDirectory;
+    public string StashFile => RefsDirectory + Path.DirectorySeparatorChar + FileSystemConstants.StashFile;
 }

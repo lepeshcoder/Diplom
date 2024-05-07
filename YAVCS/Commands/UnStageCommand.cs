@@ -68,31 +68,29 @@ public class UnStageCommand : Command,ICommand
             case CommandCases.ForceCase:
             {
                 var itemRelativePath = args[1];
-                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + '\\' + itemRelativePath;
-                if (File.Exists(itemAbsolutePath))
-                {
-                    UnStageFile(itemRelativePath,true);
-                }
-                else if (Directory.Exists(itemAbsolutePath))
+                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
+                if (Directory.Exists(itemAbsolutePath))
                 {
                     UnStageDirectory(itemAbsolutePath,true);
                 }
-                else throw new Exception($"{itemAbsolutePath} doesn't exist");
+                else
+                {
+                    UnStageFile(itemRelativePath,true);
+                }
                 break;
             }
             case CommandCases.DefaultCase:
             {
                 var itemRelativePath = args[0];
                 var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
-                if (File.Exists(itemAbsolutePath))
-                {
-                    UnStageFile(itemRelativePath);
-                }
-                else if (Directory.Exists(itemAbsolutePath))
+                if (Directory.Exists(itemAbsolutePath))
                 {
                     UnStageDirectory(itemAbsolutePath);
                 }
-                else throw new Exception($"{itemAbsolutePath} doesn't exist");
+                else
+                {
+                    UnStageFile(itemRelativePath);
+                }
                 break;
             }
             case CommandCases.UnStageAll:
@@ -115,7 +113,6 @@ public class UnStageCommand : Command,ICommand
         {
             throw new Exception("file isn't staged");
         }
-
         if (isForce)
         {
             _indexService.DeleteRecord(record.RelativePath);

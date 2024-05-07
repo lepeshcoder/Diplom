@@ -8,11 +8,11 @@
 //TODO: fix exceptions
 //TODO: pack files
 //TODO: Rebase and cherry-pick
+//TODO: Stash
 
 // high priority
-//TODO: Fix Diff and merge resolves
 //TODO: WRITE TEST AND TEST THAT ALL
-//TODO: merge --abort
+//TODO: write informative message for command fails/performs
 
 
 App.Configure();

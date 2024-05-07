@@ -21,6 +21,8 @@ public static class DependencyInjectionConfig
             .AddSingleton<IGarbageCollectorService,GarbageCollectorService>()
             .AddSingleton<IBranchService,BranchService>()
             .AddSingleton<IMergeService,MergeService>()
+            .AddSingleton<IStashService,StashService>()
+            .AddSingleton<IDiffService,DiffService>()
             .BuildServiceProvider();
     }
 }

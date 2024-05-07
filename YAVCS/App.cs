@@ -104,7 +104,7 @@ public static class App
                     Services.GetRequiredService<ICommitService>(),
                     Services.GetRequiredService<ITreeService>(),
                     Services.GetRequiredService<IBranchService>(),
-                    Services.GetRequiredService<IBlobService>())
+                    Services.GetRequiredService<IDiffService>())
             },
             {
                 "merge",
@@ -115,8 +115,18 @@ public static class App
                     Services.GetRequiredService<IMergeService>(),
                     Services.GetRequiredService<IBlobService>(),
                     Services.GetRequiredService<IHashService>())
+            },
+            {
+                "stash",
+                new StashCommand(Services.GetRequiredService<INavigatorService>(),
+                    Services.GetRequiredService<ICommitService>(),
+                    Services.GetRequiredService<ITreeService>(),
+                    Services.GetRequiredService<IHashService>(),
+                    Services.GetRequiredService<IBranchService>(),
+                    Services.GetRequiredService<IStashService>(),
+                    Services.GetRequiredService<IDiffService>(),
+                    Services.GetRequiredService<IMergeService>())
             }
-            
         };
     }
 
@@ -128,12 +138,12 @@ public static class App
             return;
         }
         var command = args[0];
-        if(!_commands.ContainsKey(command)) Console.WriteLine("No such command");
+        if(!_commands.TryGetValue(command, out var value)) Console.WriteLine("No such command");
         else
         {
             try
             {
-                _commands[args[0]].Execute(args.Skip(1).ToArray());
+                value.Execute(args.Skip(1).ToArray());
             }
             catch (Exception e)
             {

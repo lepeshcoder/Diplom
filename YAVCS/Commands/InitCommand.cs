@@ -95,11 +95,13 @@ public class InitCommand : Command,ICommand
         Directory.CreateDirectory(vcsRootDirectoryNavigator.TreesDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.CommitsDirectory);
         Directory.CreateDirectory(vcsRootDirectoryNavigator.HeadsDirectory);
+        Directory.CreateDirectory(vcsRootDirectoryNavigator.StashCommitsDirectory);
         using (var fs = File.Create(vcsRootDirectoryNavigator.HeadFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IndexFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.ConfigFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.IgnoreFile)) {};
         using (var fs = File.Create(vcsRootDirectoryNavigator.OrigHeadFile )) {};
+        using (var fs = File.Create(vcsRootDirectoryNavigator.StashFile )) {};
 
         // create zeroCommit
         var zeroCommitTree = new TreeFileModel("zeroCommitTree", new Dictionary<string, ChildItemModel>(),

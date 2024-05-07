@@ -12,15 +12,16 @@ public class TreeService : ITreeService
     private readonly IIndexService _indexService;
     private readonly IHashService _hashService;
     private readonly IBlobService _blobService;
+    private readonly IIgnoreService _ignoreService;
 
     public TreeService(INavigatorService navigatorService, IIndexService indexService,
-        IHashService hashService, IBlobService blobService)
+        IHashService hashService, IBlobService blobService, IIgnoreService ignoreService)
     {
         _navigatorService = navigatorService;
         _indexService = indexService;
         _hashService = hashService;
         _blobService = blobService;
-       
+        _ignoreService = ignoreService;
     }
     
     public string CreateTreeByIndex()
@@ -35,6 +36,13 @@ public class TreeService : ITreeService
         {
             WriteTree(tree);
         }
+        return rootTreeHash;
+    }
+
+    public string CreateTreeByWorkingDirectory()
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var rootTreeHash = FillTreeByWorkingDirectory(vcsRootDirectoryNavigator!.RepositoryRootDirectory);
         return rootTreeHash;
     }
 
@@ -217,14 +225,54 @@ public class TreeService : ITreeService
             var childType = child.Value.Type;
             if (childType == (int)ChildItemModel.Types.Blob)
             {
-                records.Add(path + child.Value.Name,new IndexRecord(path + child.Value.Name,child.Value.Hash));
+                var childPath = path + child.Value.Name;
+                if (!_ignoreService.IsItemIgnored(childPath))
+                {
+                    records.Add(childPath, new IndexRecord(childPath, child.Value.Hash));
+                }
             }
             else
             {
                 var childTree = GetTreeByHash(child.Value.Hash);
                 var newPath = path + child.Value.Name + Path.DirectorySeparatorChar;
-                ParseTree(childTree, records, newPath);
+                if (!_ignoreService.IsItemIgnored(newPath))
+                {
+                    ParseTree(childTree, records, newPath);
+                }
             }
         }
+    }
+
+    private string FillTreeByWorkingDirectory(string absoluteDirectoryPath)
+    {
+        var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
+        var directoryRelativePath =
+            Path.GetRelativePath(vcsRootDirectoryNavigator!.RepositoryRootDirectory, absoluteDirectoryPath);
+        var tree = new TreeFileModel(directoryRelativePath, []);
+        var treeHashString = "";
+        foreach (var itemPath in Directory.GetFileSystemEntries(absoluteDirectoryPath))
+        {
+            var itemRelativePath = Path.GetRelativePath(absoluteDirectoryPath, itemPath);
+            if (File.Exists(itemPath))
+            {
+                var fileBytes = File.ReadAllBytes(itemPath);
+                var blobHash = _hashService.GetHash(fileBytes);
+                if (!_blobService.IsBlobExist(blobHash))
+                {
+                    _blobService.CreateBlob(fileBytes);
+                }
+                tree.Childs.Add(itemRelativePath,new ChildItemModel(itemRelativePath,(int)ChildItemModel.Types.Blob,blobHash));
+                treeHashString += itemPath + blobHash;
+            }
+            else if (Directory.Exists(itemPath))
+            {
+                var childTreeHash = FillTreeByWorkingDirectory(itemPath);
+                tree.Childs.Add(itemRelativePath,new ChildItemModel(itemRelativePath,(int)ChildItemModel.Types.Tree,childTreeHash));
+                treeHashString += childTreeHash;
+            }
+        }
+        tree.Hash = _hashService.GetHash(treeHashString);
+        WriteTree(tree);
+        return tree.Hash;
     }
 }

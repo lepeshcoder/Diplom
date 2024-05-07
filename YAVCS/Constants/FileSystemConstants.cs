@@ -51,4 +51,8 @@ public static class FileSystemConstants
     public const string MergeConflictFile = "mergeConflict";
     // previous branch Name File
     public const string PreviousBranchFile = "previousBranch";
+    // stash commits directory
+    public const string StashCommitsDirectory = "stashCommits";
+    // stash head commit head file
+    public const string StashFile = "stashFile";
 }

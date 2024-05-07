@@ -16,7 +16,7 @@ public class MergeCommand : Command,ICommand
     private readonly IMergeService _mergeService;
     private readonly IBlobService _blobService;
     private readonly IHashService _hashService;
-
+  
     public MergeCommand(INavigatorService navigatorService, IBranchService branchService,
         ITreeService treeService, ICommitService commitService, IMergeService mergeService,
         IBlobService blobService, IHashService hashService)
@@ -95,6 +95,11 @@ public class MergeCommand : Command,ICommand
                 if (branchToMerge == null)
                 {
                     throw new ArgumentException($"Branch {branchToMergeName} Doesn't exist");
+                }
+
+                if (!_commitService.IsIndexSameFromHead())
+                {
+                    throw new Exception("cannot merge with local changes");
                 }
 
                 var activeBranch = _branchService.GetActiveBranch();
@@ -250,7 +255,7 @@ public class MergeCommand : Command,ICommand
             var isConflict = merge.Exists(block => block is Diff.MergeConflictResultBlock resultBlock &&
                                                    resultBlock.LeftLines.Length != 0 &&
                                                    resultBlock.RightLines.Length != 0);
-            var mergedFile = CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
+            var mergedFile = _mergeService.CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
             
             if (isConflict)
             {
@@ -291,7 +296,7 @@ public class MergeCommand : Command,ICommand
             var isConflict = merge.Exists(block => block is Diff.MergeConflictResultBlock resultBlock &&
                                                    (resultBlock.LeftLines.Length != 0 &&
                                                     resultBlock.RightLines.Length != 0));
-            var mergedFile = CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
+            var mergedFile = _mergeService.CreateMergeResult(merge,firstBranchPatch.BranchName,secondBranchPatch.BranchName); 
 
            
             if (isConflict)
@@ -318,37 +323,5 @@ public class MergeCommand : Command,ICommand
         return new MergeResultModel(baseCommitIndexRecords,conflictsPaths);
     }
 
-    private string[] CreateMergeResult(List<Diff.IMergeResultBlock> blocks,string firstBranchName,string secondBranchName)
-    {
-        var charCount = 6;
-        var result = new List<string>();
-        foreach (var block in blocks)
-        {
-    
-            if (block is Diff.MergeConflictResultBlock resultBlock)
-            {
-                if (resultBlock.LeftLines.Length == 0)
-                {
-                    result.AddRange(resultBlock.RightLines);
-                }
-                else if (resultBlock.RightLines.Length == 0)
-                {
-                    result.AddRange(resultBlock.LeftLines);
-                }
-                else
-                {
-                    result.Add("<<<<<<" + firstBranchName);
-                    result.AddRange(resultBlock.LeftLines);
-                    result.Add("======" + "");
-                    result.AddRange(resultBlock.RightLines);
-                    result.Add(">>>>>>" + secondBranchName);
-                }
-            }
-            else
-            {
-                result.AddRange((block as Diff.MergeOKResultBlock)!.ContentLines);
-            }
-        }
-        return result.ToArray();
-    }
+   
 }
