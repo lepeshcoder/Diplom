@@ -58,10 +58,13 @@ public class GarbageCollectorService : IGarbageCollectorService
             _commitService.DeleteCommit(commitHash);
         }
         
+        //TODO: fix deletion of stash blobs
         // get all blobs hashes from blobs directory 
         var blobsHashes = _blobService.GetAllBlobs();
+        var commits = Directory.GetFiles(commitDirectory)
+            .Concat(Directory.GetFiles(vcsRootDirectoryNavigator.StashCommitsDirectory));
         // go through each commit and delete blob hashes there are in use
-        foreach (var commitFile in Directory.GetFiles(commitDirectory))
+        foreach (var commitFile in commits)
         {
             var commit = new CommitFileModel(commitFile);
             var rootTreeHash = commit.TreeHash;

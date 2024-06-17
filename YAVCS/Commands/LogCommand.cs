@@ -37,7 +37,10 @@ public class LogCommand : Command,ICommand
         };
     }
 
-    public string Description => "Show commits on this branch";
+    public string Description => "Show Commit history from active commit:" +
+                                 "Format:\n" +
+                                 "1) Show linear history: yavcs log\n" +
+                                 "2) Show graph history: yavcs log --graph\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);
@@ -66,7 +69,6 @@ public class LogCommand : Command,ICommand
                 while (headCommit != null)
                 {
                     ShowCommitInfo(headCommit,allBranches);
-                    //TODO: СДЕЛАТЬ ЧТО ТО С ЛОГОМ
                     // check for zero commit
                     if (headCommit.ParentCommitHashes.Count == 0) return;
                     var parentCommit = _commitService.GetCommitByHash(headCommit.ParentCommitHashes[0]);
@@ -85,7 +87,7 @@ public class LogCommand : Command,ICommand
                 var headCommitHash = _branchService.GetHeadCommitHash();
                 var headCommit = _commitService.GetCommitByHash(headCommitHash);
                 
-                var allBranches = _branchService.GetAllBranches();
+                var allBranches = _branchService.GetAllBranches(); 
 
                 var ancestors = new Queue<string>([headCommit!.Hash]);
                 var commitHashesList = new List<string>();

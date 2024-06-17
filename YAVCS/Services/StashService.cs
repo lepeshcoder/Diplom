@@ -87,4 +87,10 @@ public class StashService : IStashService
         var stashCommitFilePath = vcsRootDirectoryNavigator!.StashCommitsDirectory + Path.DirectorySeparatorChar + hash;
         return !File.Exists(stashCommitFilePath) ? null : new StashCommitFileModel(stashCommitFilePath);
     }
+
+    public StashCommitFileModel? GetHeadStashCommit()
+    {
+        var headHash = GetStashHeadCommitHash();
+        return string.IsNullOrEmpty(headHash) ? null : GetStashCommit(headHash);
+    }
 }

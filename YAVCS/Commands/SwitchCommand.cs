@@ -37,7 +37,9 @@ public class SwitchCommand : Command,ICommand
         };
     }
 
-    public string Description => "Switch between branches";
+    public string Description => "Switch between branches\n" +
+                                 "Format:\n" +
+                                 "1) switch to specified branch: yavcs switch branchName\n";
     
     public void Execute(string[] args)
     {

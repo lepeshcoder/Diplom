@@ -19,4 +19,6 @@ public interface IStashService
 
     StashCommitFileModel? GetStashCommit(string hash);
 
+    StashCommitFileModel? GetHeadStashCommit();
+
 }

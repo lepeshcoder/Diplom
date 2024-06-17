@@ -41,7 +41,10 @@ public class AddCommand : Command,ICommand
         AddItem = 3
     }
     
-    public string Description => "add file or directory to staging area(index)";
+    public string Description => "add unstaged local changes to the staging area(index)\n" +
+                                 " format:\n" +
+                                 " 1) add Path: yavcs add  path\n" +
+                                 " 2) add all changes: yavcs add --a\n";
 
     public void Execute(string[] args)
     {
@@ -127,7 +130,7 @@ public class AddCommand : Command,ICommand
         if (_ignoreService.IsItemIgnored(relativePath)) return;
         var oldRecord = _indexService.TryGetRecordByPath(relativePath);
         // if record with the same path already exist
-        if (oldRecord != null)
+        if (oldRecord != null) 
         {
             // if file isn't modify
             if (oldRecord.BlobHash == newHash)

@@ -41,7 +41,9 @@ public class DiffCommand : Command,ICommand
         };
     }
 
-    public string Description => "Show Differencies between active commit and argument commit";
+    public string Description => "Show differencies between active commit and argument commit\n" +
+                                 "Format:\n" +
+                                 "1) Show diff between commits: yavcs diff commitHash\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);

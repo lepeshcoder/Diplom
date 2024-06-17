@@ -1,4 +1,5 @@
-﻿using YAVCS.Commands.Contracts;
+﻿using System.Threading.Channels;
+using YAVCS.Commands.Contracts;
 using YAVCS.Services.Contracts;
 
 namespace YAVCS.Commands;
@@ -41,7 +42,9 @@ public class CommitCommand : Command, ICommand
         };
     }
 
-    public string Description => "Take a snapshot of repository and save it as a version";
+    public string Description => "Take a snapshot of repository and save it as a version\n" +
+                                 "Format:\n" +
+                                 "1) Create Commit: yavcs commit ";
     public void Execute(string[] args)
     {
         var vcsRootDirectoryNavigator = _navigatorService.TryGetRepositoryRootDirectory();
@@ -91,8 +94,9 @@ public class CommitCommand : Command, ICommand
                 {
                     var activeBranch = _branchService.GetActiveBranch();
                     _branchService.UpdateBranch(activeBranch.Name,newCommit.Hash);
-                   // _garbageCollectorService.CollectGarbage();
+                    _garbageCollectorService.CollectGarbage();
                 }
+                Console.WriteLine($"Commit {newCommit.Message} succesfuly created");
                 break; 
             }
         }

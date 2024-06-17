@@ -30,7 +30,12 @@ public class StashCommand : Command,ICommand
         _mergeService = mergeService;
     }
 
-    public string Description => "Save Local changes";
+    public string Description => "Save Local changes and resets to head state\n" +
+                                 "Format:\n" +
+                                 "1) Push local changes: yavcs stash --push\n" +
+                                 "2) Pop local cnanges: yavcs stash --pop\n" +
+                                 "3) Show stash commits: yavcs stash --list\n" +
+                                 "4) Show what  stash commit add to current version: yavcs stash --show stashCommitNumber (from 0)\n";
     
     private enum CommandCases
     {
@@ -110,20 +115,28 @@ public class StashCommand : Command,ICommand
                 {
                     throw new Exception("Repository not Found");
                 }
+
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                var stashHeadCommit = _stashService.GetHeadStashCommit();
                 
-                var stashCommit = _stashService.Pop();
-                if (stashCommit == null)
+                if (stashHeadCommit == null)
                 {
                     throw new Exception("Nothing to pop,stash is clear");
                 }
+
+                if (headCommitHash != stashHeadCommit.BaseCommitHash)
+                {
+                    throw new Exception("Cannot pop stash on not base commit");
+                }
                 
+                var stashCommit = _stashService.Pop();
                 var currentTreeHash = _treeService.CreateTreeByWorkingDirectory();
                 
                 var currentRecords = _treeService.GetTreeRecordsByPath(currentTreeHash);
-                var stashRecords = _treeService.GetTreeRecordsByPath(stashCommit.TreeHash);
+                var stashRecords = _treeService.GetTreeRecordsByPath(stashCommit!.TreeHash);
 
-                var baseCommit = _commitService.GetCommitByHash(stashCommit.BaseCommitHash);
-                var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(baseCommit!.TreeHash);
+                var headCommit = _commitService.GetCommitByHash(_branchService.GetHeadCommitHash());
+                var baseCommitIndexRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
                 
                 var mergeResult = _mergeService.Merge(baseCommitIndexRecords,
                         currentRecords,
@@ -182,15 +195,21 @@ public class StashCommand : Command,ICommand
                 {
                     throw new Exception($"There isn't {stashCommitNumber} index in stash queue");
                 }
-
-                var headCommitHash = _branchService.GetHeadCommitHash();
-                var headCommit = _commitService.GetCommitByHash(headCommitHash);
-                var stashCommit = stashCommits[stashCommitNumber];
                 
-                var headCommitRecords = _treeService.GetTreeRecordsByPath(headCommit!.TreeHash);
+
+                var stashCommit = stashCommits[stashCommitNumber];
+                var headCommitHash = _branchService.GetHeadCommitHash();
+                
+                if (stashCommit.BaseCommitHash != headCommitHash)
+                {
+                    throw new Exception("Cannot show diff between stash on not baseCommit");
+                }
+                
+                var currentTreeHash = _treeService.CreateTreeByWorkingDirectory();
+                var currentRecords = _treeService.GetTreeRecordsByPath(currentTreeHash);
                 var stashCommitRecords = _treeService.GetTreeRecordsByPath(stashCommit.TreeHash);
 
-                var diffResult = _diffService.GetDiff(stashCommitRecords, headCommitRecords);
+                var diffResult = _diffService.GetDiff(stashCommitRecords, currentRecords);
 
                 for (int i = 0; i < diffResult.Lines.Count; i++)
                 {

@@ -45,7 +45,11 @@ public class ResetCommand : Command,ICommand
         };
     }
 
-    public string Description => "";
+    public string Description => "Reset head to specified commit:\n" +
+                                 "Format:\n" +
+                                 "1) Reset with only branch reference update: yavcs reset --soft commitHash\n" +
+                                 "2) Same as a soft reset, but index reset to commit state: yavcs reset --mixed commitHash\n" +
+                                 "3) Same as a mixed reset, but working directory reset to commit state: yavcs reset --hard commitHash\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);

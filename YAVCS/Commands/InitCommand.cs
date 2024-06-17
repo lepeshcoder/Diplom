@@ -26,7 +26,9 @@ public class InitCommand : Command,ICommand
         DefaultCase = 2
     }
     
-    public string Description => "Init - Create a repository if it doesn't exist, otherwise return exception \"Repository already exists\"";
+    public string Description => "Create a repository if it doesn't exist\n" +
+                                 "Format:\n" +
+                                 "1) Init Repository: yavcs init\n";
 
     // Services for command logic
     private readonly INavigatorService _navigatorService;

@@ -48,7 +48,10 @@ public class MergeCommand : Command,ICommand
             _ => CommandCases.SyntaxError
         };
     }
-    public string Description => "Merge 2 branches into one";
+    public string Description => "Merge 2 branches into one\n" +
+                                 "Format:\n" +
+                                 "1) Merge 2 branches: yavcs merge branchName\n" +
+                                 "2) Reset to state before merge: yavcs merge --abort\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);
@@ -136,7 +139,7 @@ public class MergeCommand : Command,ICommand
                 var mergeResult = ApplyPatches3Way(
                     commonAncestor,
                     commonAncestorToActiveBranchPatch,
-                    commonAncestorToBranchToMergePatch);
+                    commonAncestorToBranchToMergePatch);    
 
                 // if merge has no conflicts
                 if (mergeResult.ConflictPaths.Count == 0)

@@ -37,7 +37,11 @@ public class BranchCommand : Command,ICommand
         };
     }
 
-    public string Description => "Show branches, or create new branch";
+    public string Description => "Create, delete, show branches\n" +
+                                 " Format:\n" +
+                                 "1) Create branch: yavcs branch branchName\n" +
+                                 "2) Delete branch: yavcs branch --delete branchName\n" +
+                                 "3) ShowBranches: yavcs branch --show\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);

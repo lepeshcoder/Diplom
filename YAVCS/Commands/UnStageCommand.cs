@@ -44,7 +44,11 @@ public class UnStageCommand : Command,ICommand
         };
     }
     
-    public string Description => "Remove item from staging area (index)";
+    public string Description => "Remove saved local changes form index (staging area)\n" +
+                                 "Format:\n" +
+                                 "1) Unstage local change: yavcs unstage filePath\n" +
+                                 "2) Unstage all local changes: yavcs unstage --all/--a\n" +
+                                 "3) Delete path from index: yavcs unstage --force filePath\n";
     
     public void Execute(string[] args)
     {
@@ -68,7 +72,7 @@ public class UnStageCommand : Command,ICommand
             case CommandCases.ForceCase:
             {
                 var itemRelativePath = args[1];
-                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
+                var itemAbsolutePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 if (Directory.Exists(itemAbsolutePath))
                 {
                     UnStageDirectory(itemAbsolutePath,true);
@@ -82,7 +86,7 @@ public class UnStageCommand : Command,ICommand
             case CommandCases.DefaultCase:
             {
                 var itemRelativePath = args[0];
-                var itemAbsolutePath = vcsRootDirectoryNavigator.RepositoryRootDirectory + Path.DirectorySeparatorChar + itemRelativePath;
+                var itemAbsolutePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + itemRelativePath;
                 if (Directory.Exists(itemAbsolutePath))
                 {
                     UnStageDirectory(itemAbsolutePath);

@@ -57,7 +57,7 @@ public class DiffService : IDiffService
         // Элементы, которые есть только во второй коллекции
         var deletedFiles = commitToCompareIndexRecords
             .Where(pair => !baseCommitRecords.ContainsKey(pair.Key))
-            .ToDictionary(pair => pair.Key, pair => pair.Value);
+            .ToDictionary(pair => pair.Key, pair => pair.Value); 
 
         // Элементы, которые есть в обеих коллекциях
         var modifiedFiles = baseCommitRecords
@@ -101,8 +101,6 @@ public class DiffService : IDiffService
             var diffResult = GetDiff(commitToCompareFileText, currentCommitFileText);
             result.Lines.AddRange(diffResult.Lines);
             result.LineColors.AddRange(diffResult.LineColors);
-            result.Lines.Add("");
-            result.LineColors.Add(ConsoleColor.White);
         }
 
         return result;

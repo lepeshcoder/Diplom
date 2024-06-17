@@ -134,7 +134,10 @@ public static class App
     {
         if (args is [] or ["--help"] or ["--h"])
         {
-            Console.WriteLine("yavcs is a...");
+            foreach (var Command in _commands)
+            {
+                Console.WriteLine($"{Command.Key} - {Command.Value.Description}");
+            }
             return;
         }
         var command = args[0];

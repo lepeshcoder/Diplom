@@ -27,14 +27,6 @@ public class IndexRecord : IEquatable<IndexRecord>
         return RelativePath == other.RelativePath && BlobHash == other.BlobHash;
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
-        return Equals((IndexRecord)obj);
-    }
-
     public override int GetHashCode()
     {
         return HashCode.Combine(RelativePath, BlobHash);

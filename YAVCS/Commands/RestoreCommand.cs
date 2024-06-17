@@ -36,7 +36,9 @@ public class RestoreCommand : Command,ICommand
         DefaultCase = 2
     }
 
-    public string Description => "Restore deleted File from blob";
+    public string Description => "Restore local changed\n" +
+                                 "Fornat:\n" +
+                                 "1) Restore local changes: yavcs restore Path\n";
     public void Execute(string[] args)
     {
         var commandCase = GetCommandCase(args);

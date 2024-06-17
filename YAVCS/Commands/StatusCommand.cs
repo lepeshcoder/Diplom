@@ -36,7 +36,9 @@ public class StatusCommand : Command,ICommand
         _branchService = branchService;
     }
 
-    public string Description => "Show status of working tree";
+    public string Description => "Show staged, unstaged, untracked items in working directory and active branch\n" +
+                                 "Format:\n" +
+                                 "1) Show status: yavcs status\n";
     
     public void Execute(string[] args)
     {
